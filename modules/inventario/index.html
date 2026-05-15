@@ -2,7 +2,20 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <!-- ── PWA / iPhone ── -->
+  <link rel="manifest" href="../../manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PDM">
+  <meta name="theme-color" content="#004aad">
+  <link rel="apple-touch-icon" href="../../icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="../../icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="../../icons/icon-120.png">
+  <link rel="apple-touch-icon" sizes="76x76"  href="../../icons/icon-76.png">
+  <!-- Splash screens iPhone (mínimo requerido para standalone iOS) -->
+  <meta name="apple-touch-fullscreen" content="yes">
   <title>PDM — Inventario</title>
   <link rel="stylesheet" href="../../css/global.css">
 </head>
@@ -30,6 +43,17 @@
       if (!t) { location.href='../../index.html'; }
       else { var d=JSON.parse(atob(t)); if(!d||Date.now()>d.exp){localStorage.removeItem('pdm_token');location.href='../../index.html';} }
     } catch(e) { location.href='../../index.html'; }
+  </script>
+
+  <!-- ── Registro Service Worker ── -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('../../sw.js')
+          .then(function(reg) { console.log('[PDM SW] Registrado:', reg.scope); })
+          .catch(function(err) { console.warn('[PDM SW] Error:', err); });
+      });
+    }
   </script>
 </body>
 </html>

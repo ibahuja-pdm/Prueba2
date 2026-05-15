@@ -139,3 +139,39 @@ input  { font-family: var(--font); }
 .coming-soon .icon-big { font-size: 56px; opacity: .4; }
 .coming-soon h2 { font-size: 1.1rem; font-weight: 600; color: var(--text); }
 .coming-soon p  { font-size: .88rem; max-width: 220px; line-height: 1.6; }
+
+/* ── PWA / iPhone safe areas ── */
+:root {
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Status bar transparente en modo standalone iOS */
+@media (display-mode: standalone) {
+  .app-header {
+    padding-top: calc(var(--safe-top) + 0px);
+    height: calc(var(--header-h) + var(--safe-top));
+  }
+  .bottom-nav {
+    padding-bottom: var(--safe-bottom);
+    height: calc(var(--nav-h) + var(--safe-bottom));
+  }
+  .page {
+    padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
+  }
+  /* Login page sin header/nav */
+  body.login-body {
+    padding-top: var(--safe-top);
+  }
+}
+
+/* Prevenir zoom en inputs iOS */
+input, select, textarea {
+  font-size: max(16px, 1em);
+}
+
+/* Tap highlight off en toda la app */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}

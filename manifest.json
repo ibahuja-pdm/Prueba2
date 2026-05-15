@@ -1,0 +1,30 @@
+{
+  "name": "Mantenimiento PDM",
+  "short_name": "PDM",
+  "description": "Sistema de gestión de mantenimiento preventivo y predictivo",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#003280",
+  "theme_color": "#004aad",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
