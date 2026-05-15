@@ -1,16 +1,18 @@
 // PDM Service Worker — v1.0
 const CACHE_NAME = 'pdm-v1';
 
+const BASE = '/Prueba2';
+
 const PRECACHE = [
-  '/',
-  '/index.html',
-  '/menu.html',
-  '/css/global.css',
-  '/modules/hmi/index.html',
-  '/modules/dashboard/index.html',
-  '/modules/mp/index.html',
-  '/modules/qr/index.html',
-  '/modules/inventario/index.html'
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/menu.html',
+  BASE + '/css/global.css',
+  BASE + '/modules/hmi/index.html',
+  BASE + '/modules/dashboard/index.html',
+  BASE + '/modules/mp/index.html',
+  BASE + '/modules/qr/index.html',
+  BASE + '/modules/inventario/index.html'
 ];
 
 // ── Instalación: pre-cachear recursos clave ──
