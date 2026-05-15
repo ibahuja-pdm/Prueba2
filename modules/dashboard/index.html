@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDM — Dashboard KPIs</title>
+  <link rel="stylesheet" href="../../css/global.css">
+</head>
+<body>
+  <header class="app-header">
+    <a href="../../menu.html" class="back-btn">&#8592;</a>
+    <h1>Dashboard KPIs</h1>
+  </header>
+  <div class="page">
+    <div class="coming-soon">
+      <div class="icon-big">📈</div>
+      <h2>Proximamente</h2>
+      <p>Este modulo esta en desarrollo y estara disponible en la siguiente version.</p>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <div class="nav-item" onclick="location.href='../../menu.html'">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      Inicio
+    </div>
+  </nav>
+  <script>
+    try {
+      var t = localStorage.getItem('pdm_token');
+      if (!t) { location.href='../../index.html'; }
+      else { var d=JSON.parse(atob(t)); if(!d||Date.now()>d.exp){localStorage.removeItem('pdm_token');location.href='../../index.html';} }
+    } catch(e) { location.href='../../index.html'; }
+  </script>
+</body>
+</html>
