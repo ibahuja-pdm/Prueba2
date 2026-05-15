@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDM — Acceso</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    body { background:var(--blue-dark); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+    .login-wrap { width:100%; max-width:360px; display:flex; flex-direction:column; }
+    .brand { text-align:center; margin-bottom:36px; color:#fff; }
+    .brand .logo-ring { width:72px; height:72px; border-radius:20px; background:rgba(255,255,255,.12); border:1.5px solid rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 16px; }
+    .brand h1 { font-size:1.4rem; font-weight:600; letter-spacing:.02em; }
+    .brand p  { font-size:.82rem; opacity:.6; margin-top:4px; }
+    .login-card { background:var(--surface); border-radius:var(--radius-lg); padding:28px 24px; box-shadow:var(--shadow-lg); }
+    .login-card h2 { font-size:.95rem; font-weight:600; margin-bottom:20px; color:var(--text); }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+    .field label { font-size:.78rem; font-weight:500; color:var(--text-sub); letter-spacing:.03em; }
+    .field input { border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:11px 14px; font-size:.92rem; color:var(--text); background:var(--surface2); transition:border-color .15s,box-shadow .15s; outline:none; }
+    .field input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,74,173,.12); background:#fff; }
+    .btn-login { width:100%; margin-top:8px; background:var(--blue); color:#fff; border-radius:var(--radius-sm); padding:13px; font-size:.95rem; font-weight:600; letter-spacing:.02em; transition:background .15s,transform .1s; }
+    .btn-login:hover  { background:var(--blue-dark); }
+    .btn-login:active { transform:scale(.98); }
+    .error-msg { margin-top:12px; background:#fee2e2; color:#991b1b; border-radius:var(--radius-sm); padding:10px 14px; font-size:.82rem; font-weight:500; display:none; }
+    .error-msg.show { display:block; }
+    .hint { margin-top:16px; padding:12px 14px; background:var(--blue-light); border-radius:var(--radius-sm); font-size:.78rem; color:var(--blue-dark); line-height:1.6; }
+    .hint strong { font-family:var(--mono); font-size:.75rem; }
+    .version { text-align:center; margin-top:20px; font-size:.72rem; color:rgba(255,255,255,.3); }
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="logo-ring">⚙️</div>
+      <h1>Mantenimiento PDM</h1>
+      <p>Sistema de gestion Mantenimiento</p>
+    </div>
+    <div class="login-card">
+      <h2>Iniciar sesion</h2>
+      <div class="field">
+        <label>USUARIO</label>
+        <input type="text" id="inp-user" placeholder="usuario" autocomplete="username" autocapitalize="none">
+      </div>
+      <div class="field">
+        <label>CONTRASENA</label>
+        <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button class="btn-login" id="btn-login">Entrar</button>
+      <div class="error-msg" id="error-msg">Usuario o contrasena incorrectos.</div>
+      <div class="hint">
+        Prueba1
+      </div>
+    </div>
+    <div class="version">v0.1.0 - BAhuja</div>
+  </div>
+
+  <script>
+    var USERS = [
+      { usuario:'aa',     password:'123',  nombre:'Bacilio Ahuja', rol:'SR' },
+      { usuario:'supervisor', password:'admin123', nombre:'Ana Garcia',     rol:'Supervisor' }
+    ];
+
+    // Si ya hay sesion, ir directo al menu
+    try {
+      var t = localStorage.getItem('pdm_token');
+      if (t) {
+        var d = JSON.parse(atob(t));
+        if (d && d.exp && Date.now() < d.exp) { location.href = 'menu.html'; }
+        else localStorage.removeItem('pdm_token');
+      }
+    } catch(e) { localStorage.removeItem('pdm_token'); }
+
+    function doLogin() {
+      var u = document.getElementById('inp-user').value.trim();
+      var p = document.getElementById('inp-pass').value;
+      var err = document.getElementById('error-msg');
+      err.classList.remove('show');
+
+      var found = null;
+      for (var i = 0; i < USERS.length; i++) {
+        if (USERS[i].usuario === u && USERS[i].password === p) { found = USERS[i]; break; }
+      }
+
+      if (found) {
+        var data = { usuario:found.usuario, nombre:found.nombre, rol:found.rol, exp: Date.now() + 8*3600*1000 };
+        localStorage.setItem('pdm_token', btoa(JSON.stringify(data)));
+        location.href = 'menu.html';
+      } else {
+        err.classList.add('show');
+        document.getElementById('inp-pass').value = '';
+        document.getElementById('inp-pass').focus();
+      }
+    }
+
+    document.getElementById('btn-login').addEventListener('click', doLogin);
+    document.getElementById('inp-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+    document.getElementById('inp-user').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('inp-pass').focus(); });
+  </script>
+</body>
+</html>

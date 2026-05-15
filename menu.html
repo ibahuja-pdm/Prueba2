@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDM — Inicio</title>
+  <link rel="stylesheet" href="css/global.css">
+  <style>
+    .welcome-bar { background:var(--blue); color:#fff; padding:20px 20px 28px; }
+    .welcome-bar .greeting { font-size:.8rem; opacity:.7; margin-bottom:4px; }
+    .welcome-bar h2 { font-size:1.3rem; font-weight:600; }
+    .welcome-bar .role-badge { display:inline-block; margin-top:8px; background:rgba(255,255,255,.18); border-radius:20px; padding:3px 10px; font-size:.72rem; font-weight:500; }
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:16px 16px 0; }
+    .stat-card { background:var(--surface); border-radius:var(--radius-md); border:1px solid var(--border); padding:14px 12px; text-align:center; }
+    .stat-card .val { font-size:1.5rem; font-weight:600; font-family:var(--mono); color:var(--blue); }
+    .stat-card .lbl { font-size:.68rem; color:var(--text-sub); margin-top:2px; }
+    .section-title { padding:20px 16px 10px; font-size:.78rem; font-weight:600; color:var(--text-sub); letter-spacing:.08em; }
+    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:0 16px; }
+    .module-card { background:var(--surface); border-radius:var(--radius-md); border:1px solid var(--border); padding:18px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow-sm); transition:transform .15s,box-shadow .15s; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+    .module-card:active { transform:scale(.97); box-shadow:none; }
+    .module-card.active-module { border-color:var(--blue); }
+    .icon-box { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; }
+    .icon-box.blue   { background:var(--blue-light); }
+    .icon-box.green  { background:#e1f5ee; }
+    .icon-box.amber  { background:#fef3c7; }
+    .icon-box.teal   { background:#e0f7fa; }
+    .icon-box.purple { background:#ede9fe; }
+    .icon-box.gray   { background:#f1efea; }
+    .module-card h3 { font-size:.95rem; font-weight:600; color:var(--text); }
+    .module-card p  { font-size:.78rem; color:var(--text-sub); }
+    .tag { font-size:.66rem; font-weight:600; letter-spacing:.05em; padding:2px 7px; border-radius:6px; align-self:flex-start; }
+    .tag.live { background:#e1f5ee; color:#0f6e56; }
+    .tag.soon { background:#f1efea; color:#5f5e5a; }
+  </style>
+</head>
+<body>
+  <div class="welcome-bar">
+    <div class="greeting">Bienvenido,</div>
+    <h2 id="user-name">—</h2>
+    <span class="role-badge" id="user-role">—</span>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="val">12</div><div class="lbl">Equipos activos</div></div>
+    <div class="stat-card"><div class="val">3</div><div class="lbl">MP pendientes</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--success)">98%</div><div class="lbl">Disponibilidad</div></div>
+  </div>
+
+  <div class="section-title">MODULOS</div>
+
+  <div class="grid">
+    <div class="module-card active-module" onclick="location.href='modules/hmi/index.html'">
+      <div class="icon-box blue">🖥️</div>
+      <h3>HMI</h3><p>Monitoreo en tiempo real</p>
+      <span class="tag live">EN VIVO</span>
+    </div>
+    <div class="module-card" onclick="location.href='modules/dashboard/index.html'">
+      <div class="icon-box green">📈</div>
+      <h3>Dashboard</h3><p>KPIs y tendencias</p>
+      <span class="tag soon">PROXIMO</span>
+    </div>
+    <div class="module-card" onclick="location.href='modules/mp/index.html'">
+      <div class="icon-box amber">📅</div>
+      <h3>MP Programados</h3><p>Formatos y rutinas</p>
+      <span class="tag soon">PROXIMO</span>
+    </div>
+    <div class="module-card" onclick="location.href='modules/qr/index.html'">
+      <div class="icon-box teal">🔳</div>
+      <h3>QR</h3><p>Recorridos y auditorias</p>
+      <span class="tag soon">PROXIMO</span>
+    </div>
+    <div class="module-card" onclick="location.href='modules/inventario/index.html'">
+      <div class="icon-box purple">📦</div>
+      <h3>Inventario</h3><p>Refacciones y stock</p>
+      <span class="tag soon">PROXIMO</span>
+    </div>
+    <div class="module-card" style="opacity:.5;pointer-events:none">
+      <div class="icon-box gray">🔧</div>
+      <h3>Extra</h3><p>Pruebas y configuracion</p>
+      <span class="tag soon">PROXIMO</span>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      Inicio
+    </div>
+    <div class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+      Alertas
+    </div>
+    <div class="nav-item">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Ayuda
+    </div>
+    <div class="nav-item" id="nav-cuenta">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8.966 8.966 0 0112 15c2.172 0 4.17.768 5.75 2.036M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      <span id="nav-name">Cuenta</span>
+    </div>
+  </nav>
+
+  <script>
+    // Verificar sesion
+    function getUser() {
+      try {
+        var t = localStorage.getItem('pdm_token');
+        if (!t) return null;
+        var d = JSON.parse(atob(t));
+        if (Date.now() > d.exp) { localStorage.removeItem('pdm_token'); return null; }
+        return d;
+      } catch(e) { return null; }
+    }
+
+    var user = getUser();
+    if (!user) { location.href = 'index.html'; }
+    else {
+      document.getElementById('user-name').textContent = user.nombre;
+      document.getElementById('user-role').textContent = user.rol;
+      document.getElementById('nav-name').textContent  = user.nombre.split(' ')[0];
+    }
+
+    document.getElementById('nav-cuenta').addEventListener('click', function() {
+      if (confirm('Cerrar sesion?')) {
+        localStorage.removeItem('pdm_token');
+        location.href = 'index.html';
+      }
+    });
+  </script>
+</body>
+</html>
