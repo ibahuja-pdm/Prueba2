@@ -31,18 +31,8 @@
       flex-direction: column;
     }
 
-    /* ── Welcome bar ── */
-    .welcome-bar {
-      background: var(--blue); color: #fff;
-      padding: clamp(8px,2vh,18px) clamp(12px,4vw,20px) clamp(8px,2vh,18px);
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .welcome-bar h2 {
-      font-size: clamp(1rem,4vw,1.4rem);
-      font-weight: 700; margin: 0; letter-spacing: .01em;
-      display: flex; align-items: center; gap: 8px;
-    }
+    /* ── Header: sobreescribir app-header para centrar título ── */
+    .app-header { justify-content: center; }
 
     /* ── Stats ── */
     .stats-row {
@@ -147,9 +137,9 @@
   </style>
 </head>
 <body>
-  <div class="welcome-bar">
-    <h2>🔧 Mantenimiento PDM</h2>
-  </div>
+  <header class="app-header">
+    <h1>🔧 Mantenimiento PDM</h1>
+  </header>
 
   <div class="stats-row">
     <div class="stat-card"><div class="val">12</div><div class="lbl">Equipos activos</div></div>
@@ -265,7 +255,7 @@
         if (navStyle.position === 'fixed') navH = nav.offsetHeight;
       }
 
-      var barH   = (document.querySelector('.welcome-bar')   || {offsetHeight:0}).offsetHeight;
+      var barH   = (document.querySelector('.app-header')   || {offsetHeight:0}).offsetHeight;
       var statsH = (document.querySelector('.stats-row')     || {offsetHeight:0}).offsetHeight;
       var titleH = (document.querySelector('.section-title') || {offsetHeight:0}).offsetHeight;
 
