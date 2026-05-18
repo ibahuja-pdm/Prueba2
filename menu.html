@@ -19,36 +19,142 @@
   <title>PDM — Inicio</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    .welcome-bar { background:var(--blue); color:#fff; padding:20px 20px 28px; }
-    .welcome-bar .greeting { font-size:.8rem; opacity:.7; margin-bottom:4px; }
-    .welcome-bar h2 { font-size:1.3rem; font-weight:600; }
-    .welcome-bar .role-badge { display:inline-block; margin-top:8px; background:rgba(255,255,255,.18); border-radius:20px; padding:3px 10px; font-size:.72rem; font-weight:500; }
-    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:16px 16px 0; }
-    .stat-card { background:var(--surface); border-radius:var(--radius-md); border:1px solid var(--border); padding:14px 12px; text-align:center; }
-    .stat-card .val { font-size:1.5rem; font-weight:600; font-family:var(--mono); color:var(--blue); }
-    .stat-card .lbl { font-size:.68rem; color:var(--text-sub); margin-top:2px; }
-    .section-title { padding:20px 16px 10px; font-size:.78rem; font-weight:600; color:var(--text-sub); letter-spacing:.08em; }
-    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:0 16px; }
-    .module-card { background:var(--surface); border-radius:var(--radius-md); border:1px solid var(--border); padding:18px 16px; display:flex; flex-direction:column; gap:10px; box-shadow:var(--shadow-sm); transition:transform .15s,box-shadow .15s; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-    .module-card:active { transform:scale(.97); box-shadow:none; }
-    .module-card.active-module { border-color:var(--blue); }
-    .icon-box { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; }
-    .icon-box.blue   { background:var(--blue-light); }
-    .icon-box.green  { background:#e1f5ee; }
-    .icon-box.amber  { background:#fef3c7; }
-    .icon-box.teal   { background:#e0f7fa; }
-    .icon-box.purple { background:#ede9fe; }
-    .icon-box.gray   { background:#f1efea; }
-    .module-card h3 { font-size:.95rem; font-weight:600; color:var(--text); }
-    .module-card p  { font-size:.78rem; color:var(--text-sub); }
-    .tag { font-size:.66rem; font-weight:600; letter-spacing:.05em; padding:2px 7px; border-radius:6px; align-self:flex-start; }
-    .tag.live { background:#e1f5ee; color:#0f6e56; }
-    .tag.soon { background:#f1efea; color:#5f5e5a; }
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { height: 100dvh; }
+    body {
+      min-height: 100dvh;
+      overflow-x: hidden;
+      overflow-y: hidden;
+      margin: 0; padding: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Welcome bar ── */
+    .welcome-bar {
+      background: var(--blue); color: #fff;
+      padding: clamp(8px,2vh,18px) clamp(12px,4vw,20px) clamp(8px,2vh,18px);
+      flex-shrink: 0;
+    }
+    .welcome-bar h2 {
+      font-size: clamp(.9rem,3.5vw,1.3rem);
+      font-weight: 600; margin: 0;
+    }
+    .welcome-bar .role-badge {
+      display: inline-block;
+      margin-top: clamp(3px,.8vh,8px);
+      background: rgba(255,255,255,.18);
+      border-radius: 20px;
+      padding: 2px clamp(8px,2vw,10px);
+      font-size: clamp(.58rem,2.2vw,.72rem);
+      font-weight: 500;
+    }
+
+    /* ── Stats ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: clamp(5px,1.5vw,10px);
+      padding: clamp(6px,1.5vh,14px) clamp(10px,3vw,16px) 0;
+      flex-shrink: 0;
+    }
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: clamp(6px,1.2vh,12px) clamp(6px,2vw,12px);
+      text-align: center;
+    }
+    .stat-card .val {
+      font-size: clamp(.9rem,3.5vw,1.5rem);
+      font-weight: 600; font-family: var(--mono); color: var(--blue);
+    }
+    .stat-card .lbl {
+      font-size: clamp(.55rem,2vw,.68rem);
+      color: var(--text-sub); margin-top: 2px;
+    }
+
+    /* ── Título sección ── */
+    .section-title {
+      padding: clamp(5px,1.2vh,12px) clamp(10px,3vw,16px) clamp(3px,.8vh,6px);
+      font-size: clamp(.62rem,2.3vw,.78rem);
+      font-weight: 600; color: var(--text-sub); letter-spacing: .08em;
+      flex-shrink: 0;
+    }
+
+    /* ── Grid: altura y rows los calcula JS ── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      /* gap y gridTemplateRows los sobreescribe fitGrid() */
+      padding: 0 clamp(10px,3vw,16px);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    /* ── Tarjeta ── */
+    .module-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      padding: clamp(5px,1.2vw,12px) clamp(8px,2vw,14px);
+      display: flex; flex-direction: row; align-items: center;
+      gap: clamp(6px,1.8vw,12px);
+      box-shadow: var(--shadow-sm);
+      transition: transform .15s, box-shadow .15s;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+      overflow: hidden; min-height: 0;
+    }
+    .module-card:active  { transform: scale(.97); box-shadow: none; }
+    .module-card.active-module { border-color: var(--blue); }
+
+    /* ── Icono ── */
+    .icon-box {
+      width: clamp(26px,6.5vw,40px);
+      height: clamp(26px,6.5vw,40px);
+      border-radius: clamp(6px,1.8vw,11px);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: clamp(13px,3.5vw,20px);
+    }
+    .icon-box.blue   { background: var(--blue-light); }
+    .icon-box.green  { background: #e1f5ee; }
+    .icon-box.amber  { background: #fef3c7; }
+    .icon-box.teal   { background: #e0f7fa; }
+    .icon-box.purple { background: #ede9fe; }
+    .icon-box.gray   { background: #f1efea; }
+
+    /* ── Texto ── */
+    .module-card .info {
+      display: flex; flex-direction: column; gap: 1px;
+      min-width: 0; flex: 1;
+    }
+    .module-card h3 {
+      font-size: clamp(.68rem,3vw,.9rem);
+      font-weight: 600; color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin: 0;
+    }
+    .module-card p {
+      font-size: clamp(.56rem,2.3vw,.74rem);
+      color: var(--text-sub);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin: 0;
+    }
+    .tag {
+      font-size: clamp(.5rem,1.9vw,.62rem);
+      font-weight: 600; letter-spacing: .04em;
+      padding: 1px clamp(4px,1.2vw,6px);
+      border-radius: 4px; align-self: flex-start;
+      white-space: nowrap; margin-top: 1px;
+    }
+    .tag.live { background: #e1f5ee; color: #0f6e56; }
+    .tag.soon { background: #f1efea; color: #5f5e5a; }
   </style>
 </head>
 <body>
   <div class="welcome-bar">
-    <div class="greeting">Bienvenido,</div>
     <h2 id="user-name">—</h2>
     <span class="role-badge" id="user-role">—</span>
   </div>
@@ -61,36 +167,42 @@
 
   <div class="section-title">MODULOS</div>
 
-  <div class="grid">
+  <div class="grid" id="mod-grid">
     <div class="module-card active-module" onclick="location.href='modules/hmi/index.html'">
       <div class="icon-box blue">🖥️</div>
-      <h3>HMI</h3><p>Monitoreo en tiempo real</p>
-      <span class="tag live">EN VIVO</span>
+      <div class="info"><h3>HMI</h3><p>Monitoreo en tiempo real</p></div>
     </div>
     <div class="module-card" onclick="location.href='modules/dashboard/index.html'">
       <div class="icon-box green">📈</div>
-      <h3>Dashboard</h3><p>KPIs y tendencias</p>
-      <span class="tag soon">PROXIMO</span>
+      <div class="info"><h3>Dashboard</h3><p>KPIs y tendencias</p><span class="tag soon">PROXIMO</span></div>
     </div>
     <div class="module-card" onclick="location.href='modules/mp/index.html'">
       <div class="icon-box amber">📅</div>
-      <h3>MP Programados</h3><p>Formatos y rutinas</p>
-      <span class="tag soon">PROXIMO</span>
+      <div class="info"><h3>MP Programados</h3><p>Formatos y rutinas</p><span class="tag soon">PROXIMO</span></div>
     </div>
     <div class="module-card" onclick="location.href='modules/qr/index.html'">
       <div class="icon-box teal">🔳</div>
-      <h3>QR</h3><p>Recorridos y auditorias</p>
-      <span class="tag soon">PROXIMO</span>
+      <div class="info"><h3>QR</h3><p>Recorridos y auditorias</p><span class="tag soon">PROXIMO</span></div>
     </div>
     <div class="module-card" onclick="location.href='modules/inventario/index.html'">
       <div class="icon-box purple">📦</div>
-      <h3>Inventario</h3><p>Refacciones y stock</p>
-      <span class="tag soon">PROXIMO</span>
+      <div class="info"><h3>Inventario</h3><p>Refacciones y stock</p><span class="tag soon">PROXIMO</span></div>
+    </div>
+    <div class="module-card" onclick="location.href='modules/inventario/index.html'">
+      <div class="icon-box purple">📦</div>
+      <div class="info"><h3>Inventario</h3><p>Refacciones y stock</p><span class="tag soon">PROXIMO</span></div>
+    </div>
+    <div class="module-card" onclick="location.href='modules/inventario/index.html'">
+      <div class="icon-box purple">📦</div>
+      <div class="info"><h3>Inventario</h3><p>Refacciones y stock</p><span class="tag soon">PROXIMO</span></div>
     </div>
     <div class="module-card" style="opacity:.5;pointer-events:none">
       <div class="icon-box gray">🔧</div>
-      <h3>Extra</h3><p>Pruebas y configuracion</p>
-      <span class="tag soon">PROXIMO</span>
+      <div class="info"><h3>Extra</h3><p>Pruebas y configuracion</p><span class="tag soon">PROXIMO</span></div>
+    </div>
+    <div class="module-card" style="opacity:.5;pointer-events:none">
+      <div class="icon-box gray">🔧</div>
+      <div class="info"><h3>Extra</h3><p>Pruebas y configuracion</p><span class="tag soon">PROXIMO</span></div>
     </div>
   </div>
 
@@ -138,6 +250,71 @@
         localStorage.removeItem('pdm_token');
         location.href = 'index.html';
       }
+    });
+  </script>
+
+  <!-- ── Ajuste de altura del grid al espacio disponible ── -->
+  <script>
+    function fitGrid() {
+      var grid = document.getElementById('mod-grid');
+      if (!grid) return;
+
+      // Limpiar estilos previos para obtener medidas reales
+      grid.style.height = '';
+      grid.style.gridTemplateRows = '';
+      grid.style.gap = '';
+
+      var vh  = window.innerHeight;
+      var vw  = window.innerWidth;
+
+      // Medir elementos fijos DESPUÉS de limpiar el grid
+      var navH   = 0;
+      var nav = document.querySelector('.bottom-nav');
+      if (nav) {
+        var navStyle = window.getComputedStyle(nav);
+        // bottom-nav puede ser fixed (global.css) o en flujo
+        navH = navStyle.position === 'fixed' ? nav.offsetHeight : 0;
+        // Si es fixed siempre reservamos su espacio
+        if (navStyle.position === 'fixed') navH = nav.offsetHeight;
+      }
+
+      var barH   = (document.querySelector('.welcome-bar')   || {offsetHeight:0}).offsetHeight;
+      var statsH = (document.querySelector('.stats-row')     || {offsetHeight:0}).offsetHeight;
+      var titleH = (document.querySelector('.section-title') || {offsetHeight:0}).offsetHeight;
+
+      // gap proporcional, entre 4 y 10px
+      var gap = Math.round(Math.max(4, Math.min(10, vw * 0.012)));
+      // padding horizontal del grid (ya está en CSS, no se suma a la altura)
+      // padding bottom pequeño para respirar sobre el nav
+      var padB = Math.round(Math.max(6, Math.min(14, vh * 0.016)));
+
+      // Espacio real disponible para el grid
+      var available = vh - barH - statsH - titleH - navH - padB;
+
+      // Filas según número de tarjetas (2 columnas fijas)
+      var cards = grid.querySelectorAll('.module-card').length;
+      var rows  = Math.ceil(cards / 2);
+
+      // Altura de cada fila
+      var rowH = Math.floor((available - gap * (rows - 1)) / rows);
+      if (rowH < 1) rowH = 1; // nunca negativo
+
+      grid.style.height           = available + 'px';
+      grid.style.gridTemplateRows = 'repeat(' + rows + ', ' + rowH + 'px)';
+      grid.style.gap              = gap + 'px';
+    }
+
+    // Esperar a que el DOM esté pintado antes de medir
+    function schedulefit() {
+      requestAnimationFrame(function() {
+        requestAnimationFrame(fitGrid);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', schedulefit);
+    window.addEventListener('resize', fitGrid);
+    window.addEventListener('orientationchange', function() {
+      setTimeout(fitGrid, 100); // orientationchange necesita un tick extra
     });
   </script>
 
