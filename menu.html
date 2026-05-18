@@ -36,19 +36,12 @@
       background: var(--blue); color: #fff;
       padding: clamp(8px,2vh,18px) clamp(12px,4vw,20px) clamp(8px,2vh,18px);
       flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
     }
     .welcome-bar h2 {
-      font-size: clamp(.9rem,3.5vw,1.3rem);
-      font-weight: 600; margin: 0;
-    }
-    .welcome-bar .role-badge {
-      display: inline-block;
-      margin-top: clamp(3px,.8vh,8px);
-      background: rgba(255,255,255,.18);
-      border-radius: 20px;
-      padding: 2px clamp(8px,2vw,10px);
-      font-size: clamp(.58rem,2.2vw,.72rem);
-      font-weight: 500;
+      font-size: clamp(1rem,4vw,1.4rem);
+      font-weight: 700; margin: 0; letter-spacing: .01em;
+      display: flex; align-items: center; gap: 8px;
     }
 
     /* ── Stats ── */
@@ -155,8 +148,7 @@
 </head>
 <body>
   <div class="welcome-bar">
-    <h2 id="user-name">—</h2>
-    <span class="role-badge" id="user-role">—</span>
+    <h2>🔧 Mantenimiento PDM</h2>
   </div>
 
   <div class="stats-row">
@@ -221,7 +213,7 @@
     </div>
     <div class="nav-item" id="nav-cuenta">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A8.966 8.966 0 0112 15c2.172 0 4.17.768 5.75 2.036M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      <span id="nav-name">Cuenta</span>
+      Cuenta
     </div>
   </nav>
 
@@ -239,11 +231,6 @@
 
     var user = getUser();
     if (!user) { location.href = 'index.html'; }
-    else {
-      document.getElementById('user-name').textContent = user.nombre;
-      document.getElementById('user-role').textContent = user.rol;
-      document.getElementById('nav-name').textContent  = user.nombre.split(' ')[0];
-    }
 
     document.getElementById('nav-cuenta').addEventListener('click', function() {
       if (confirm('Cerrar sesion?')) {
