@@ -9,138 +9,101 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="PDM HMI">
-<meta name="theme-color" content="#004b87">
+<meta name="theme-color" content="#004aad">
 <style>
-  /* ─── TOKENS ─────────────────────────────────────────────── */
-  :root {
-    --blue:       #004b87;
-    --blue-dark:  #003d6f;
-    --blue-light: #e7f3ff;
-    --bg:         #f0f2f5;
-    --card:       #ffffff;
-    --text:       #1d2129;
-    --muted:      #65676b;
-    --border:     #e4e6eb;
-    --success:    #007D43;
-    --warning:    #BF8900;
-    --danger:     #D93025;
-    --header-h:   56px;
-  }
-
-  /* ─── RESET ──────────────────────────────────────────────── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Layout principal ── */
   html, body {
-    height: 100%; height: 100dvh;
-    overflow: hidden;
-    font-family: 'Inter', system-ui, sans-serif;
+    height: 100dvh; overflow: hidden;
+    font-family: var(--font);
     background: var(--bg);
   }
-
-  /* ─── LAYOUT ─────────────────────────────────────────────── */
   .app-shell {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    overflow: hidden;
+    display: flex; flex-direction: column;
+    height: 100dvh; overflow: hidden;
   }
 
-  /* ─── HEADER ─────────────────────────────────────────────── */
+  /* ── Header HMI ── */
   .main-header {
     background: var(--blue);
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-bottom: 0;
-    height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-    min-height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    padding: var(--safe-top) 16px 0;
+    height: calc(var(--header-h) + var(--safe-top));
+    display: flex; align-items: center;
+    justify-content: space-between; flex-shrink: 0;
+    gap: 8px;
   }
-  .main-header h2 {
-    font-size: 18px;
-    color: #fff;
-    font-weight: 600;
+  .main-header h2 { font-size: 16px; color: #fff; font-weight: 600; }
+
+  /* Indicador de última actualización */
+  .update-info {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: rgba(255,255,255,.65);
+    font-family: var(--mono);
     white-space: nowrap;
+  }
+  .update-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #4caf50; flex-shrink: 0;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  .update-dot.error  { background: var(--danger); animation: none; }
+  .update-dot.loading { background: var(--warning); }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: .4; }
   }
 
-  /* ─── HMI VIEW ───────────────────────────────────────────── */
-  #hmi-view {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    overflow: hidden;
-    min-height: 0;
-  }
+  /* ── Tabs ── */
   .tab-nav {
-    display: flex;
-    background: #e4e6eb;
-    padding: 4px;
-    border-radius: 10px;
-    margin: 12px 12px 0;
-    flex-shrink: 0;
+    display: flex; background: #e4e6eb;
+    padding: 4px; border-radius: 10px;
+    margin: 12px 12px 0; flex-shrink: 0;
   }
   .tab-btn {
-    flex: 1;
-    border: none;
-    padding: 9px;
-    font-size: 12px;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    background: transparent;
-    color: var(--muted);
-    transition: background 0.2s, color 0.2s;
-    white-space: nowrap;
-    touch-action: manipulation;
+    flex: 1; border: none; padding: 9px;
+    font-size: 12px; font-weight: 700;
+    border-radius: 8px; cursor: pointer;
+    background: transparent; color: var(--muted);
+    transition: background .2s, color .2s;
+    white-space: nowrap; touch-action: manipulation;
   }
   .tab-btn.active {
-    background: white;
-    color: var(--blue);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: white; color: var(--blue);
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
   }
+
+  /* ── Contenedores de scroll ── */
   #hmi-container, #temp-container {
-    flex: 1;
-    overflow-y: auto;
+    flex: 1; overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding: 10px 12px 16px;
+    padding: 10px 12px calc(var(--nav-h) + var(--safe-bottom) + 16px);
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    align-content: start;
+    gap: 10px; align-content: start;
   }
   #temp-container { display: none; }
 
-  /* ─── HMI CARDS ──────────────────────────────────────────── */
+  /* ── HMI Cards ── */
   .hmi-card {
-    background: white;
-    border-radius: 12px;
-    padding: 12px;
-    border-left: 5px solid var(--blue);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    background: white; border-radius: 12px;
+    padding: 12px; border-left: 5px solid var(--blue);
+    box-shadow: 0 2px 6px rgba(0,0,0,.06);
     min-width: 0;
+    transition: opacity .3s, transform .3s;
   }
   .hmi-card.alert { border-left-color: var(--danger); }
+
   .hmi-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2px;
-    flex-wrap: wrap;
-    gap: 4px;
+    display: flex; justify-content: space-between;
+    align-items: flex-start; margin-bottom: 2px; gap: 4px;
   }
   .hmi-title { font-size: 14px; font-weight: 800; color: var(--text); }
   .hmi-sub   { font-size: 10px; color: var(--muted); margin-bottom: 4px; }
+
   .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 8px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 20px;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px; white-space: nowrap;
+    flex-shrink: 0;
   }
   .badge-operativo      { background: #E6F6EF; color: #007D43; }
   .badge-carga-parcial  { background: #FFF8E6; color: #BF8900; }
@@ -151,21 +114,18 @@
 
   .gauge-wrap { display: flex; justify-content: center; margin: 6px 0 0; }
   .gauge-wrap svg { width: 100%; height: auto; display: block; }
+
   .kpi-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--success);
-    text-align: center;
-    margin-top: -2px;
-    margin-bottom: 8px;
+    font-size: 22px; font-weight: 800;
+    color: var(--success); text-align: center;
+    margin-top: -2px; margin-bottom: 8px;
   }
   .kpi-off { color: #C5C7D4; font-size: 20px; }
+
   .metrics {
     border-top: 1px solid var(--bg);
     padding-top: 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: flex; flex-direction: column; gap: 6px;
   }
   .mrow   { display: flex; justify-content: space-between; font-size: 11px; }
   .mlabel { color: var(--muted); font-weight: 500; }
@@ -175,27 +135,20 @@
   .c-danger  { color: #D93025; }
   .c-off     { color: #C5C7D4; }
 
-  /* ─── TEMP CARDS ─────────────────────────────────────────── */
+  /* ── Temp Cards ── */
   .temp-card {
-    background: #fff;
-    border-radius: 12px;
+    background: #fff; border-radius: 12px;
     border: 0.5px solid var(--border);
     border-left: 4px solid #2ecc71;
     padding: 12px 12px 12px 14px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    display: flex; flex-direction: column;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
   }
   .temp-card.out { border-left-color: #e74c3c; }
   .temp-card-area {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.2px;
-    margin-bottom: 6px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 10px; font-weight: 700; color: var(--text);
+    letter-spacing: 0.2px; margin-bottom: 6px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .temp-card-divider { border: none; border-top: 0.5px solid var(--border); margin: 0 0 8px; }
   .temp-card-value-row { display: flex; align-items: baseline; gap: 2px; margin-bottom: 10px; }
@@ -206,16 +159,12 @@
   .badge-in-range  { background: #e7f7ed; color: #007D43; }
   .badge-out-range { background: #fceae9; color: #B9251C; }
 
-  /* ─── LOADING / ERROR ────────────────────────────────────── */
+  /* ── Loading / Error ── */
   .loading-msg {
-    text-align: center;
-    padding: 40px 24px;
-    font-size: 12px;
-    color: var(--muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
+    text-align: center; padding: 40px 24px;
+    font-size: 12px; color: var(--muted);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
     grid-column: 1 / -1;
   }
   .spinner {
@@ -227,20 +176,25 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ─── SAFE AREA ──────────────────────────────────────────── */
-  #hmi-container, #temp-container {
-    padding-bottom: calc(var(--nav-h, 64px) + 16px);
+  /* Mensaje de error con botón reintentar */
+  .error-block {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    grid-column: 1 / -1; padding: 32px 24px; text-align: center;
   }
-  @supports (padding: env(safe-area-inset-bottom)) {
-    #hmi-container, #temp-container {
-      padding-bottom: calc(var(--nav-h, 64px) + 16px + env(safe-area-inset-bottom));
-    }
+  .error-block .icon { font-size: 32px; }
+  .error-block p { font-size: 12px; color: var(--danger); }
+  .btn-retry {
+    font-size: 12px; font-weight: 600; color: var(--blue);
+    background: var(--blue-light); border-radius: 8px;
+    padding: 8px 18px; transition: background .15s;
+    border: none; cursor: pointer;
   }
+  .btn-retry:hover { background: #d4e5f9; }
 
-  /* ─── DESKTOP ────────────────────────────────────────────── */
+  /* ── Desktop ── */
   @media (min-width: 768px) {
-    #hmi-container  { grid-template-columns: repeat(5, 1fr); padding: 10px 24px 24px; }
-    #temp-container { grid-template-columns: repeat(6, 1fr); padding: 10px 24px 24px; }
+    #hmi-container  { grid-template-columns: repeat(5, 1fr); padding: 10px 24px calc(var(--nav-h) + 24px); }
+    #temp-container { grid-template-columns: repeat(6, 1fr); padding: 10px 24px calc(var(--nav-h) + 24px); }
     .tab-nav        { max-width: 460px; margin: 16px 24px 0; }
     .hmi-card       { padding: 10px; }
     .hmi-title      { font-size: 13px; }
@@ -251,15 +205,14 @@
     .gauge-wrap svg { max-width: 200px; }
   }
 
-  /* ─── MOBILE ─────────────────────────────────────────────── */
   @media (max-width: 767px) {
-    .hmi-title      { font-size: 13px; }
-    .hmi-sub        { font-size: 9px; }
-    .mrow           { font-size: 10px; }
-    .kpi-value      { font-size: 18px; }
-    .status-badge   { font-size: 7px; padding: 2px 5px; }
-    .temp-card-value    { font-size: 24px; }
-    .temp-range-badge   { font-size: 9px; padding: 2px 6px; }
+    .hmi-title { font-size: 13px; }
+    .hmi-sub   { font-size: 9px; }
+    .mrow      { font-size: 10px; }
+    .kpi-value { font-size: 18px; }
+    .status-badge { font-size: 7px; padding: 2px 5px; }
+    .temp-card-value  { font-size: 24px; }
+    .temp-range-badge { font-size: 9px; padding: 2px 6px; }
   }
 </style>
 </head>
@@ -270,10 +223,14 @@
   <!-- HEADER -->
   <header class="main-header">
     <h2>🖥️ HMI – Monitoreo</h2>
+    <div class="update-info" id="update-info">
+      <div class="update-dot loading" id="update-dot"></div>
+      <span id="update-ts">Conectando…</span>
+    </div>
   </header>
 
   <!-- HMI VIEW -->
-  <section id="hmi-view">
+  <section id="hmi-view" style="display:flex;flex-direction:column;flex:1;overflow:hidden;min-height:0;">
     <div class="tab-nav">
       <button id="tab-ch" class="tab-btn active" onclick="switchTab('CH')">❄️ CHILLERS</button>
       <button id="tab-cp" class="tab-btn"        onclick="switchTab('CP')">🔧 COMPRESORES</button>
@@ -283,32 +240,63 @@
     <div id="temp-container"></div>
   </section>
 
-</div><!-- /.app-shell -->
+</div>
 
-<!-- ── Barra de navegación inferior ── -->
+<!-- NAVEGACIÓN INFERIOR -->
 <nav class="bottom-nav">
   <div class="nav-item active">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+    </svg>
     HMI
   </div>
   <div class="nav-item" onclick="location.href='../../menu.html'">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/>
+    </svg>
     Inicio
   </div>
   <div class="nav-item" id="nav-salir-hmi">
-    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+    </svg>
     Salir
   </div>
 </nav>
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   CONFIG
+   AUTENTICACIÓN
 ═══════════════════════════════════════════════════════════ */
-const CONFIG = {
+(function checkAuth() {
+  try {
+    var raw = localStorage.getItem('pdm_token');
+    if (!raw) { location.href = '../../index.html'; return; }
+    var d = JSON.parse(atob(raw));
+    if (!d || !d.exp || Date.now() >= d.exp) {
+      localStorage.removeItem('pdm_token');
+      location.href = '../../index.html';
+    }
+  } catch (e) {
+    location.href = '../../index.html';
+  }
+})();
+
+document.getElementById('nav-salir-hmi').addEventListener('click', function () {
+  if (confirm('¿Cerrar sesión?')) {
+    localStorage.removeItem('pdm_token');
+    location.href = '../../index.html';
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   CONFIGURACIÓN
+═══════════════════════════════════════════════════════════ */
+var CONFIG = {
   TOKEN:             'eyJhbGciOiJIUzI1NiJ9.eyJ0aWQiOjYyMzQyMjcyOSwiYWFpIjoxMSwidWlkIjoxMDA3NjU5OSwiaWFkIjoiMjAyNi0wMi0xOVQxNjoxMjo1Ni4wMDBaIiwicGVyIjoibWU6d3JpdGUiLCJhY3RpZCI6NDQ3Njg5MSwicmduIjoidXNlMSJ9.nY2MXM-x6fb95m2BvxmhUFVMHLxHrJpnl8ZNyjcFfVA',
   BOARD_CHILLERS:    '18403987245',
   BOARD_COMPRESORES: '18406608853',
+  REFRESH_MS:        60000,    /* Auto-refresh cada 60 segundos */
   CH_LIST: ['CH001','CH002','CH003','CH004','CH005','CH006','CH007','CH008','CH009','CH010'],
   CP_LIST: ['COMP001','COMP002','COMP003'],
   COL_CH: {
@@ -329,17 +317,18 @@ const CONFIG = {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   STATIC DATA
+   DATOS ESTÁTICOS
 ═══════════════════════════════════════════════════════════ */
-const CHILLER_SUB = {
-  CH001:'Confort Oficinas', CH002:'Confort CR1/CR2', CH003:'Confort CR1/CR2',
-  CH004:'Proceso CR2',      CH005:'Proceso CR3',     CH006:'Confort CR3',
-  CH007:'Confort CR3',      CH008:'Confort CR4',     CH009:'Confort CR4', CH010:'Proceso CR2',
+var CHILLER_SUB = {
+  CH001:'Confort Oficinas',  CH002:'Confort CR1/CR2', CH003:'Confort CR1/CR2',
+  CH004:'Proceso CR2',       CH005:'Proceso CR3',     CH006:'Confort CR3',
+  CH007:'Confort CR3',       CH008:'Confort CR4',     CH009:'Confort CR4',
+  CH010:'Proceso CR2',
 };
-const COMPRESOR_SUB = {
+var COMPRESOR_SUB = {
   COMP001:'Compresor CR1', COMP002:'Compresor CR3', COMP003:'Compresor CR4',
 };
-const TEMP_SENSORS = [
+var TEMP_SENSORS = [
   { area:'PDM-TCR1',       temp:21.60, min:16, max:25 },
   { area:'PDM-TCR2',       temp:22.90, min:16, max:25 },
   { area:'PDM-TCR3',       temp:22.45, min:16, max:25 },
@@ -356,15 +345,15 @@ const TEMP_SENSORS = [
   { area:'PDM-CR4_3',      temp:18.20, min:16, max:26 },
   { area:'PDM-PRINT_ROOM', temp:18.50, min:16, max:26 },
 ];
-const STATUS_KEY_MAP = [
+var STATUS_KEY_MAP = [
   { match:'operativo',     key:'operativo'     },
   { match:'carga parcial', key:'carga-parcial' },
   { match:'alarma',        key:'alarma-activa' },
   { match:'falla',         key:'falla-critica' },
   { match:'standby',       key:'standby'       },
 ];
-const DEFAULT_STATUS = 'fuera-servicio';
-const STATUS_META = {
+var DEFAULT_STATUS = 'fuera-servicio';
+var STATUS_META = {
   'operativo':      { badge:'badge-operativo',      label:'● Operativo',         cardClass:''      },
   'carga-parcial':  { badge:'badge-carga-parcial',  label:'◐ Carga Parcial',     cardClass:''      },
   'alarma-activa':  { badge:'badge-alarma-activa',  label:'⚠ Alarma Activa',     cardClass:'alert' },
@@ -374,17 +363,17 @@ const STATUS_META = {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   HMI — TABS
+   TABS
 ═══════════════════════════════════════════════════════════ */
-let currentTab = 'CH';
+var currentTab = 'CH';
 
 function switchTab(type) {
   currentTab = type;
-  ['CH','CP','TC'].forEach(t =>
-    document.getElementById(`tab-${t.toLowerCase()}`).classList.toggle('active', t === type)
-  );
-  const hmiEl  = document.getElementById('hmi-container');
-  const tempEl = document.getElementById('temp-container');
+  ['CH','CP','TC'].forEach(function (t) {
+    document.getElementById('tab-' + t.toLowerCase()).classList.toggle('active', t === type);
+  });
+  var hmiEl  = document.getElementById('hmi-container');
+  var tempEl = document.getElementById('temp-container');
   if (type === 'TC') {
     hmiEl.style.display  = 'none';
     tempEl.style.display = 'grid';
@@ -397,47 +386,49 @@ function switchTab(type) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HMI — GAUGE
+   GAUGE SVG
 ═══════════════════════════════════════════════════════════ */
-const SVG_NS = 'http://www.w3.org/2000/svg';
-const GAUGE  = { CX:115, CY:85, R_OUTER:78, R_INNER:52, R_NEEDLE:70 };
+var SVG_NS = 'http://www.w3.org/2000/svg';
+var GAUGE  = { W:230, H:100, CX:115, CY:88, R_OUTER:72, R_INNER:54, R_NEEDLE:64 };
 
 function svgEl(tag, attrs) {
-  const el = document.createElementNS(SVG_NS, tag);
-  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  var el = document.createElementNS(SVG_NS, tag);
+  Object.entries(attrs).forEach(function(kv){ el.setAttribute(kv[0], kv[1]); });
   return el;
 }
 
-function gaugePoint(val, r) {
-  const angle = (180 - (Math.min(val, 100) / 100) * 180) * (Math.PI / 180);
-  return { x: GAUGE.CX + r * Math.cos(angle), y: GAUGE.CY - r * Math.sin(angle) };
+function gaugePoint(pct, r) {
+  var angle = Math.PI + (pct / 100) * Math.PI;
+  return { x: GAUGE.CX + r * Math.cos(angle), y: GAUGE.CY + r * Math.sin(angle) };
 }
 
-function buildGauge(svg, gradId, unit = '%') {
-  const { CX, CY, R_OUTER, R_INNER } = GAUGE;
-  const defs = document.createElementNS(SVG_NS, 'defs');
-  const grad = svgEl('linearGradient', { id:gradId, x1:'0%', y1:'0%', x2:'100%', y2:'0%' });
+function buildGauge(svg, gradId, unit) {
+  var CX = GAUGE.CX, CY = GAUGE.CY, R_OUTER = GAUGE.R_OUTER, R_INNER = GAUGE.R_INNER;
+  svg.setAttribute('viewBox', '0 0 230 100');
+
+  var defs = document.createElementNS(SVG_NS, 'defs');
+  var grad = svgEl('linearGradient', { id:gradId, x1:'0%', y1:'0%', x2:'100%', y2:'0%' });
   [{ o:'0%', c:'#00A859' }, { o:'55%', c:'#FFB800' }, { o:'100%', c:'#D93025' }]
-    .forEach(({ o, c }) => grad.appendChild(svgEl('stop', { offset:o, 'stop-color':c })));
+    .forEach(function(s){ grad.appendChild(svgEl('stop', { offset:s.o, 'stop-color':s.c })); });
   defs.appendChild(grad);
   svg.appendChild(defs);
 
-  const o1 = gaugePoint(0, R_OUTER), o2 = gaugePoint(100, R_OUTER);
-  const i1 = gaugePoint(0, R_INNER), i2 = gaugePoint(100, R_INNER);
-  const arcD = `M ${o1.x} ${o1.y} A ${R_OUTER} ${R_OUTER} 0 0 1 ${o2.x} ${o2.y}`
-             + ` L ${i2.x} ${i2.y} A ${R_INNER} ${R_INNER} 0 0 0 ${i1.x} ${i1.y} Z`;
+  var o1 = gaugePoint(0, R_OUTER), o2 = gaugePoint(100, R_OUTER);
+  var i1 = gaugePoint(0, R_INNER), i2 = gaugePoint(100, R_INNER);
+  var arcD = 'M ' + o1.x + ' ' + o1.y + ' A ' + R_OUTER + ' ' + R_OUTER + ' 0 0 1 ' + o2.x + ' ' + o2.y
+           + ' L ' + i2.x + ' ' + i2.y + ' A ' + R_INNER + ' ' + R_INNER + ' 0 0 0 ' + i1.x + ' ' + i1.y + ' Z';
   svg.appendChild(svgEl('path', { d:arcD, fill:'#F5F6FA', stroke:'#E6E9EF', 'stroke-width':'1' }));
-  svg.appendChild(svgEl('path', { d:arcD, fill:`url(#${gradId})`, opacity:'0.85' }));
+  svg.appendChild(svgEl('path', { d:arcD, fill:'url(#' + gradId + ')', opacity:'0.85' }));
 
-  [0, 25, 50, 75, 100].forEach(v => {
-    const p1 = gaugePoint(v, R_OUTER + 2), p2 = gaugePoint(v, R_OUTER + 8), pl = gaugePoint(v, R_OUTER + 16);
+  [0, 25, 50, 75, 100].forEach(function(v) {
+    var p1 = gaugePoint(v, R_OUTER + 2), p2 = gaugePoint(v, R_OUTER + 8), pl = gaugePoint(v, R_OUTER + 16);
     svg.appendChild(svgEl('line', { x1:p1.x, y1:p1.y, x2:p2.x, y2:p2.y, stroke:'#C5C7D4', 'stroke-width':'1.5' }));
-    const lbl = svgEl('text', { x:pl.x, y:pl.y + 4, 'text-anchor':'middle', 'font-size':'8', fill:'#676879', 'font-family':'Inter', 'font-weight':'600' });
+    var lbl = svgEl('text', { x:pl.x, y:pl.y + 4, 'text-anchor':'middle', 'font-size':'8', fill:'#676879', 'font-family':'IBM Plex Sans', 'font-weight':'600' });
     lbl.textContent = v + unit;
     svg.appendChild(lbl);
   });
 
-  const needle = svgEl('line', { x1:CX, y1:CY, x2:CX - GAUGE.R_NEEDLE, y2:CY, stroke:'#323338', 'stroke-width':'2.5', 'stroke-linecap':'round' });
+  var needle = svgEl('line', { x1:CX, y1:CY, x2:CX - GAUGE.R_NEEDLE, y2:CY, stroke:'#323338', 'stroke-width':'2.5', 'stroke-linecap':'round' });
   svg.appendChild(needle);
   svg.appendChild(svgEl('circle', { cx:CX, cy:CY, r:'9', fill:'#FFFFFF', stroke:'#E6E9EF', 'stroke-width':'2' }));
   svg.appendChild(svgEl('circle', { cx:CX, cy:CY, r:'4', fill:'#004F9F' }));
@@ -446,142 +437,139 @@ function buildGauge(svg, gradId, unit = '%') {
 
 function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
 
-function animateNeedle(needle, kpiEl, targetPct, formatFn, colorFn, delay = 0) {
-  setTimeout(() => {
-    const startTime = performance.now();
+function animateNeedle(needle, kpiEl, targetPct, formatFn, colorFn, delay) {
+  setTimeout(function () {
+    var startTime = performance.now();
     function frame(now) {
-      const t   = Math.min((now - startTime) / 1200, 1);
-      const cur = easeOut(t) * targetPct;
-      const pt  = gaugePoint(cur, GAUGE.R_NEEDLE);
+      var t   = Math.min((now - startTime) / 1200, 1);
+      var cur = easeOut(t) * targetPct;
+      var pt  = gaugePoint(cur, GAUGE.R_NEEDLE);
       needle.setAttribute('x2', pt.x);
       needle.setAttribute('y2', pt.y);
       if (kpiEl) { kpiEl.textContent = formatFn(cur); kpiEl.style.color = colorFn(cur); }
       if (t < 1) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-  }, delay);
+  }, delay || 0);
 }
 
-function animateLoadGauge(needle, kpiEl, loadPct, delay = 0) {
+function animateLoadGauge(needle, kpiEl, loadPct, delay) {
   animateNeedle(needle, kpiEl, loadPct,
-    cur => `${Math.round(cur)} %`,
-    cur => cur > 85 ? '#D93025' : cur > 65 ? '#BF8900' : '#007D43',
+    function(cur){ return Math.round(cur) + ' %'; },
+    function(cur){ return cur > 85 ? '#D93025' : cur > 65 ? '#BF8900' : '#007D43'; },
     delay);
 }
 
-function animateTempGauge(needle, kpiEl, tempF, maxTempF = 150, delay = 0) {
-  const targetPct = Math.min((tempF / maxTempF) * 100, 100);
+function animateTempGauge(needle, kpiEl, tempF, maxTempF, delay) {
+  var targetPct = Math.min((tempF / (maxTempF || 150)) * 100, 100);
   animateNeedle(needle, kpiEl, targetPct,
-    cur => `${Math.round((cur / 100) * tempF)} °F`,
-    cur => cur > 80 ? '#D93025' : cur > 55 ? '#BF8900' : '#007D43',
+    function(cur){ return Math.round((cur / 100) * tempF) + ' °F'; },
+    function(cur){ return cur > 80 ? '#D93025' : cur > 55 ? '#BF8900' : '#007D43'; },
     delay);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HMI — HELPERS
+   HELPERS HMI
 ═══════════════════════════════════════════════════════════ */
-const DASH = '—';
+var DASH = '—';
 
-function parseStatus(raw = '') {
-  const s     = raw.toLowerCase().trim();
-  const found = STATUS_KEY_MAP.find(({ match }) => s.includes(match));
+function parseStatus(raw) {
+  var s = (raw || '').toLowerCase().trim();
+  var found = STATUS_KEY_MAP.find(function(k){ return s.includes(k.match); });
   return found ? found.key : DEFAULT_STATUS;
 }
 
-function statusMeta(key)     { return STATUS_META[key] ?? STATUS_META[DEFAULT_STATUS]; }
+function statusMeta(key)     { return STATUS_META[key] || STATUS_META[DEFAULT_STATUS]; }
 function isOff(sk)           { return sk === 'fuera-servicio' || sk === 'standby'; }
 function loadColorClass(pct) { return pct > 85 ? 'c-danger' : pct > 65 ? 'c-warning' : 'c-normal'; }
 function tempColorClass(f)   { return f > 110 ? 'c-danger' : 'c-normal'; }
 
-function metricRow(label, value, colorClass = '') {
-  return `<div class="mrow"><span class="mlabel">${label}</span><span class="mval ${colorClass}">${value}</span></div>`;
+function metricRow(label, value, colorClass) {
+  return '<div class="mrow"><span class="mlabel">' + label + '</span><span class="mval ' + (colorClass||'') + '">' + value + '</span></div>';
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HMI — CARD RENDERERS
+   CARD RENDERERS
 ═══════════════════════════════════════════════════════════ */
-function createHmiCard({ name, sub, status, gaugePrefix, kpiDefault, metrics }, idx) {
-  const off  = isOff(status);
-  const meta = statusMeta(status);
-  const svgId = `svg-${gaugePrefix}-${idx}`;
-  const kpiId = `kpi-${gaugePrefix}-${idx}`;
+function createHmiCard(opts, idx) {
+  var off  = isOff(opts.status);
+  var meta = statusMeta(opts.status);
+  var svgId = 'svg-' + opts.gaugePrefix + '-' + idx;
+  var kpiId = 'kpi-' + opts.gaugePrefix + '-' + idx;
 
-  const card = document.createElement('div');
-  card.className = `hmi-card ${meta.cardClass}`.trim();
-  card.innerHTML = `
-    <div class="hmi-header">
-      <span class="hmi-title">${name}</span>
-      <span class="status-badge ${meta.badge}">${meta.label}</span>
-    </div>
-    <div class="hmi-sub">${sub}</div>
-    <div class="gauge-wrap"><svg id="${svgId}" viewBox="0 0 230 100"></svg></div>
-    <div class="kpi-value ${off ? 'kpi-off' : ''}" id="${kpiId}">${off ? DASH : kpiDefault}</div>
-    <div class="metrics">${metrics.map(m => metricRow(m.label, off ? DASH : m.value, off ? 'c-off' : m.cls)).join('')}</div>`;
+  var card = document.createElement('div');
+  card.className = ('hmi-card ' + (meta.cardClass || '')).trim();
+  card.innerHTML =
+    '<div class="hmi-header">' +
+      '<span class="hmi-title">' + opts.name + '</span>' +
+      '<span class="status-badge ' + meta.badge + '">' + meta.label + '</span>' +
+    '</div>' +
+    '<div class="hmi-sub">' + opts.sub + '</div>' +
+    '<div class="gauge-wrap"><svg id="' + svgId + '" viewBox="0 0 230 100"></svg></div>' +
+    '<div class="kpi-value ' + (off ? 'kpi-off' : '') + '" id="' + kpiId + '">' + (off ? DASH : opts.kpiDefault) + '</div>' +
+    '<div class="metrics">' + opts.metrics.map(function(m){ return metricRow(m.label, off ? DASH : m.value, off ? 'c-off' : m.cls); }).join('') + '</div>';
 
   document.getElementById('hmi-container').appendChild(card);
-  return {
-    svg:   document.getElementById(svgId),
-    kpiEl: document.getElementById(kpiId),
-  };
+  return { svg: document.getElementById(svgId), kpiEl: document.getElementById(kpiId) };
 }
 
-function renderChillerCard(ch, idx, delay = 0) {
-  const off = isOff(ch.status);
-  const { svg, kpiEl } = createHmiCard({
+function renderChillerCard(ch, idx, delay) {
+  var off = isOff(ch.status);
+  var res = createHmiCard({
     name: ch.name, sub: ch.sub, status: ch.status,
     gaugePrefix: 'ch', kpiDefault: '0 %',
     metrics: [
-      { label:'Carga',      value:`${ch.carga} %`,    cls: loadColorClass(ch.carga) },
-      { label:'T° Salida',  value:`${ch.tempOut} °F`, cls: 'c-normal'              },
-      { label:'T° Entrada', value:`${ch.tempIn} °F`,  cls: 'c-normal'              },
-      { label:'P. Salida',  value:`${ch.presOut} psi`,cls: 'c-warning'             },
-      { label:'P. Entrada', value:`${ch.presIn} psi`, cls: 'c-warning'             },
+      { label:'Carga',      value:ch.carga   + ' %',   cls: loadColorClass(ch.carga)   },
+      { label:'T° Salida',  value:ch.tempOut + ' °F',  cls: 'c-normal'                 },
+      { label:'T° Entrada', value:ch.tempIn  + ' °F',  cls: 'c-normal'                 },
+      { label:'P. Salida',  value:ch.presOut + ' psi', cls: 'c-warning'                },
+      { label:'P. Entrada', value:ch.presIn  + ' psi', cls: 'c-warning'                },
     ],
   }, idx);
-  const needle = buildGauge(svg, `grad-ch-${idx}`, '%');
-  if (!off) animateLoadGauge(needle, kpiEl, ch.carga, delay);
+  var needle = buildGauge(res.svg, 'grad-ch-' + idx, '%');
+  if (!off) animateLoadGauge(needle, res.kpiEl, ch.carga, delay);
 }
 
-function renderCompresorCard(cp, idx, delay = 0) {
-  const off = isOff(cp.status);
-  const { svg, kpiEl } = createHmiCard({
+function renderCompresorCard(cp, idx, delay) {
+  var off = isOff(cp.status);
+  var res = createHmiCard({
     name: cp.name, sub: cp.sub, status: cp.status,
     gaugePrefix: 'cp', kpiDefault: '0 °F',
     metrics: [
-      { label:'T° Carga',    value:`${cp.tempCarga} °F`,    cls: tempColorClass(cp.tempCarga)    },
-      { label:'T° Descarga', value:`${cp.tempDescarga} °F`, cls: tempColorClass(cp.tempDescarga) },
-      { label:'P. Carga',    value:`${cp.presCarga} psi`,   cls: 'c-warning'                     },
-      { label:'P. Descarga', value:`${cp.presDescarga} psi`,cls: 'c-warning'                     },
+      { label:'T° Carga',    value:cp.tempCarga    + ' °F',  cls: tempColorClass(cp.tempCarga)    },
+      { label:'T° Descarga', value:cp.tempDescarga + ' °F',  cls: tempColorClass(cp.tempDescarga) },
+      { label:'P. Carga',    value:cp.presCarga    + ' psi', cls: 'c-warning'                     },
+      { label:'P. Descarga', value:cp.presDescarga + ' psi', cls: 'c-warning'                     },
     ],
   }, idx);
-  const needle = buildGauge(svg, `grad-cp-${idx}`, '°F');
-  if (!off) animateTempGauge(needle, kpiEl, cp.tempCarga, 150, delay);
+  var needle = buildGauge(res.svg, 'grad-cp-' + idx, '°F');
+  if (!off) animateTempGauge(needle, res.kpiEl, cp.tempCarga, 150, delay);
 }
 
 /* ═══════════════════════════════════════════════════════════
-   HMI — TEMP CARDS
+   TEMP CARDS
 ═══════════════════════════════════════════════════════════ */
 function renderTempCards() {
-  const container = document.getElementById('temp-container');
+  var container = document.getElementById('temp-container');
   container.innerHTML = '';
-  TEMP_SENSORS.forEach(s => {
-    const inRange  = s.temp >= s.min && s.temp <= s.max;
-    const badgeCls = inRange ? 'badge-in-range' : 'badge-out-range';
-    const badgeTxt = inRange
-      ? `En rango ${s.min}°–${s.max}°`
-      : `Fuera de rango ${s.min}°–${s.max}°`;
-    const card = document.createElement('div');
-    card.className = `temp-card${inRange ? '' : ' out'}`;
-    card.innerHTML = `
-      <div class="temp-card-area">AREA: ${s.area}</div>
-      <hr class="temp-card-divider">
-      <div class="temp-card-value-row">
-        <span class="temp-card-value">${s.temp.toFixed(2).replace('.', ',')}</span>
-        <span class="temp-card-unit">°C</span>
-      </div>
-      <div class="temp-card-footer">
-        <span class="temp-range-badge ${badgeCls}">${badgeTxt}</span>
-      </div>`;
+  TEMP_SENSORS.forEach(function (s) {
+    var inRange  = s.temp >= s.min && s.temp <= s.max;
+    var badgeCls = inRange ? 'badge-in-range' : 'badge-out-range';
+    var badgeTxt = inRange
+      ? 'En rango ' + s.min + '°–' + s.max + '°'
+      : 'Fuera de rango ' + s.min + '°–' + s.max + '°';
+    var card = document.createElement('div');
+    card.className = 'temp-card' + (inRange ? '' : ' out');
+    card.innerHTML =
+      '<div class="temp-card-area">AREA: ' + s.area + '</div>' +
+      '<hr class="temp-card-divider">' +
+      '<div class="temp-card-value-row">' +
+        '<span class="temp-card-value">' + s.temp.toFixed(2).replace('.', ',') + '</span>' +
+        '<span class="temp-card-unit">°C</span>' +
+      '</div>' +
+      '<div class="temp-card-footer">' +
+        '<span class="temp-range-badge ' + badgeCls + '">' + badgeTxt + '</span>' +
+      '</div>';
     container.appendChild(card);
   });
 }
@@ -589,40 +577,34 @@ function renderTempCards() {
 /* ═══════════════════════════════════════════════════════════
    MONDAY.COM API
 ═══════════════════════════════════════════════════════════ */
-const MONDAY_API     = 'https://api.monday.com/v2';
-const MONDAY_HEADERS = {
+var MONDAY_API     = 'https://api.monday.com/v2';
+var MONDAY_HEADERS = {
   'Content-Type':  'application/json',
   'Authorization': CONFIG.TOKEN,
   'API-Version':   '2023-10',
 };
 
 async function fetchAllItems(boardId) {
-  const items = [];
-  let cursor  = null;
+  var items  = [];
+  var cursor = null;
   do {
-    const cursorArg = cursor ? `, cursor: "${cursor}"` : '';
-    const query = `query {
-      boards(ids: ${boardId}) {
-        items_page(limit: 100${cursorArg}) {
-          cursor
-          items { id name created_at column_values { id text } }
-        }
-      }
-    }`;
-    const res  = await fetch(MONDAY_API, { method:'POST', headers:MONDAY_HEADERS, body:JSON.stringify({ query }) });
-    const data = await res.json();
-    if (data.errors) throw new Error(data.errors.map(e => e.message).join(', '));
-    const page = data.data.boards[0].items_page;
-    items.push(...page.items);
-    cursor = page.cursor ?? null;
+    var cursorArg = cursor ? ', cursor: "' + cursor + '"' : '';
+    var query = 'query { boards(ids: ' + boardId + ') { items_page(limit: 100' + cursorArg + ') { cursor items { id name created_at column_values { id text } } } } }';
+    var res   = await fetch(MONDAY_API, { method:'POST', headers:MONDAY_HEADERS, body:JSON.stringify({ query }) });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data  = await res.json();
+    if (data.errors) throw new Error(data.errors.map(function(e){ return e.message; }).join(', '));
+    var page  = data.data.boards[0].items_page;
+    items.push.apply(items, page.items);
+    cursor = page.cursor || null;
   } while (cursor);
   return items;
 }
 
 function latestByName(items, allowList) {
-  const map = new Map();
-  items.forEach(item => {
-    const name = item.name.trim().toUpperCase();
+  var map = new Map();
+  items.forEach(function (item) {
+    var name = item.name.trim().toUpperCase();
     if (!allowList.includes(name)) return;
     if (!map.has(name) || new Date(item.created_at) > new Date(map.get(name).created_at))
       map.set(name, item);
@@ -631,87 +613,131 @@ function latestByName(items, allowList) {
 }
 
 function numericCol(item, colId) {
-  const raw = item.column_values.find(c => c.id === colId)?.text ?? '';
+  var raw = (item.column_values.find(function(c){ return c.id === colId; }) || {}).text || '';
   return parseFloat(raw.replace(/[^\d.-]/g, '')) || 0;
 }
 
 function statusCol(item, colId) {
-  return item.column_values.find(c => c.id === colId)?.text ?? '';
+  return (item.column_values.find(function(c){ return c.id === colId; }) || {}).text || '';
 }
 
-/* ─── State ─── */
-let allCHItems = [], allCPItems = [];
+/* ═══════════════════════════════════════════════════════════
+   ESTADO Y RENDERING
+═══════════════════════════════════════════════════════════ */
+var allCHItems = [], allCPItems = [];
 
-function showLoading(msg = 'Conectando con Monday.com…') {
+function setUpdateDot(state) {
+  var dot = document.getElementById('update-dot');
+  dot.className = 'update-dot ' + (state || '');
+}
+
+function setUpdateTs(text) {
+  document.getElementById('update-ts').textContent = text;
+}
+
+function showLoading() {
   document.getElementById('hmi-container').innerHTML =
-    `<div class="loading-msg"><div class="spinner"></div><span>${msg}</span></div>`;
+    '<div class="loading-msg"><div class="spinner"></div><span>Conectando con Monday.com…</span></div>';
+  setUpdateDot('loading');
+  setUpdateTs('Cargando…');
 }
 
-function showError(msg = 'Error de conexión. Intente de nuevo.') {
+function showError(msg) {
   document.getElementById('hmi-container').innerHTML =
-    `<div class="loading-msg" style="color:var(--danger)">⚠ ${msg}</div>`;
-}
-
-async function fetchData() {
-  showLoading();
-  try {
-    [allCHItems, allCPItems] = await Promise.all([
-      fetchAllItems(CONFIG.BOARD_CHILLERS),
-      fetchAllItems(CONFIG.BOARD_COMPRESORES),
-    ]);
-    renderItems();
-  } catch (err) {
-    console.error('Monday.com fetch error:', err);
-    showError();
-  }
+    '<div class="error-block">' +
+      '<div class="icon">⚠️</div>' +
+      '<p>' + (msg || 'Error de conexión.') + '</p>' +
+      '<button class="btn-retry" onclick="fetchData()">Reintentar</button>' +
+    '</div>';
+  setUpdateDot('error');
+  setUpdateTs('Error');
 }
 
 function renderItems() {
   document.getElementById('hmi-container').innerHTML = '';
   if (currentTab === 'CH') {
-    const latest = latestByName(allCHItems, CONFIG.CH_LIST);
-    CONFIG.CH_LIST.forEach((name, i) => {
-      const item = latest.get(name);
+    var latest = latestByName(allCHItems, CONFIG.CH_LIST);
+    CONFIG.CH_LIST.forEach(function (name, i) {
+      var item = latest.get(name);
       if (!item) return;
-      const { COL_CH } = CONFIG;
+      var COL = CONFIG.COL_CH;
       renderChillerCard({
-        name, sub: CHILLER_SUB[name] ?? 'Equipo',
-        carga:   numericCol(item, COL_CH.CARGA),
-        tempOut: numericCol(item, COL_CH.TEMP_OUT),
-        tempIn:  numericCol(item, COL_CH.TEMP_IN),
-        presOut: numericCol(item, COL_CH.PRES_OUT),
-        presIn:  numericCol(item, COL_CH.PRES_IN),
-        status:  parseStatus(statusCol(item, COL_CH.STATUS)),
+        name, sub: CHILLER_SUB[name] || 'Equipo',
+        carga:   numericCol(item, COL.CARGA),
+        tempOut: numericCol(item, COL.TEMP_OUT),
+        tempIn:  numericCol(item, COL.TEMP_IN),
+        presOut: numericCol(item, COL.PRES_OUT),
+        presIn:  numericCol(item, COL.PRES_IN),
+        status:  parseStatus(statusCol(item, COL.STATUS)),
       }, i, i * 80);
     });
   } else {
-    const latest = latestByName(allCPItems, CONFIG.CP_LIST);
-    CONFIG.CP_LIST.forEach((name, i) => {
-      const item = latest.get(name);
+    var latest = latestByName(allCPItems, CONFIG.CP_LIST);
+    CONFIG.CP_LIST.forEach(function (name, i) {
+      var item = latest.get(name);
       if (!item) return;
-      const { COL_CP } = CONFIG;
+      var COL = CONFIG.COL_CP;
       renderCompresorCard({
-        name, sub: COMPRESOR_SUB[name] ?? 'Equipo',
-        tempCarga:    numericCol(item, COL_CP.TEMP_CARGA),
-        tempDescarga: numericCol(item, COL_CP.TEMP_DESCARGA),
-        presCarga:    numericCol(item, COL_CP.PRES_CARGA),
-        presDescarga: numericCol(item, COL_CP.PRES_DESCARGA),
-        status:       parseStatus(statusCol(item, COL_CP.STATUS)),
+        name, sub: COMPRESOR_SUB[name] || 'Equipo',
+        tempCarga:    numericCol(item, COL.TEMP_CARGA),
+        tempDescarga: numericCol(item, COL.TEMP_DESCARGA),
+        presCarga:    numericCol(item, COL.PRES_CARGA),
+        presDescarga: numericCol(item, COL.PRES_DESCARGA),
+        status:       parseStatus(statusCol(item, COL.STATUS)),
       }, i, i * 80);
     });
   }
+
+  /* Actualizar timestamp */
+  var now = new Date();
+  var hh  = String(now.getHours()).padStart(2,'0');
+  var mm  = String(now.getMinutes()).padStart(2,'0');
+  var ss  = String(now.getSeconds()).padStart(2,'0');
+  setUpdateDot('');
+  setUpdateTs('Act. ' + hh + ':' + mm + ':' + ss);
 }
 
-/* ─── Arranque ─── */
-fetchData();
+/* ═══════════════════════════════════════════════════════════
+   FETCH + AUTO-REFRESH
+═══════════════════════════════════════════════════════════ */
+var refreshTimer = null;
 
-/* ─── Salir ─── */
-document.getElementById('nav-salir-hmi').addEventListener('click', function() {
-  if (confirm('¿Cerrar sesión?')) {
-    localStorage.removeItem('pdm_token');
-    location.href = '../../index.html';
+async function fetchData() {
+  showLoading();
+  try {
+    var results = await Promise.all([
+      fetchAllItems(CONFIG.BOARD_CHILLERS),
+      fetchAllItems(CONFIG.BOARD_COMPRESORES),
+    ]);
+    allCHItems = results[0];
+    allCPItems = results[1];
+    if (currentTab !== 'TC') renderItems();
+  } catch (err) {
+    console.error('[HMI] Monday.com error:', err);
+    showError('No se pudo conectar: ' + err.message);
+  }
+}
+
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  refreshTimer = setInterval(function () {
+    if (currentTab !== 'TC') fetchData();
+  }, CONFIG.REFRESH_MS);
+}
+
+/* Pausar refresh cuando la tab está en segundo plano */
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) {
+    clearInterval(refreshTimer);
+  } else {
+    fetchData();
+    startAutoRefresh();
   }
 });
+
+/* Arranque */
+fetchData();
+startAutoRefresh();
 </script>
 </body>
 </html>

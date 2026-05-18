@@ -4,55 +4,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>PDM — Inicio</title>
-  
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#004b87">
+  <meta name="theme-color" content="#004aad">
   <link rel="stylesheet" href="css/global.css">
-
   <style>
-    /* ─── TOKENS HMI (Sincronizados) ─── */
-    :root {
-      --blue:       #004b87;
-      --blue-dark:  #003d6f;
-      --blue-light: #e7f3ff;
-      --bg:         #f0f2f5;
-      --card:       #ffffff;
-      --text:       #1d2129;
-      --muted:      #65676b;
-      --border:     #e4e6eb;
-      --success:    #007D43;
-      --warning:    #BF8900;
-      --danger:     #D93025;
-      --header-h:   56px;
-    }
-
-    /* ─── RESET & BASE ─── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       height: 100dvh;
       overflow: hidden;
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
       display: flex;
       flex-direction: column;
     }
 
-    /* ─── HEADER (Estilo HMI) ─── */
-    .app-header {
-      background: var(--blue);
-      padding-top: env(safe-area-inset-top, 0px);
-      height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      color: white;
+    /* Header con info de usuario */
+    .app-header { justify-content: space-between; }
+    .header-left { display: flex; flex-direction: column; }
+    .header-left .title { font-size: .95rem; font-weight: 600; }
+    .header-left .subtitle { font-size: .7rem; opacity: .6; font-family: var(--mono); }
+    .header-user {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.12);
+      padding: 6px 10px; border-radius: 20px;
+      font-size: .75rem; font-weight: 500;
+      cursor: pointer; transition: background .15s;
+      white-space: nowrap;
     }
-    .app-header h1 { font-size: 18px; font-weight: 600; }
+    .header-user:hover { background: rgba(255,255,255,.2); }
+    .user-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; flex-shrink: 0;
+    }
 
-    /* ─── STATS (Tarjetas rápidas) ─── */
+    /* Stats */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -61,25 +47,25 @@
       flex-shrink: 0;
     }
     .stat-card {
-      background: var(--card);
-      border-radius: 12px;
+      background: var(--surface);
+      border-radius: var(--radius-md);
       padding: 10px;
       text-align: center;
       border: 1px solid var(--border);
     }
     .stat-card .val { font-size: 18px; font-weight: 800; color: var(--blue); }
-    .stat-card .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+    .stat-card .lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; margin-top: 2px; letter-spacing: .04em; }
 
-    /* ─── GRID DE MÓDULOS ─── */
+    /* Sección */
     .section-title {
       padding: 16px 14px 8px;
-      font-size: 11px;
-      font-weight: 700;
+      font-size: 11px; font-weight: 700;
       color: var(--muted);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+      letter-spacing: .05em; text-transform: uppercase;
+      flex-shrink: 0;
     }
 
+    /* Grid de módulos */
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -88,97 +74,53 @@
       flex: 1;
       overflow-y: auto;
       align-content: start;
-      padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px);
     }
 
-    /* ─── TARJETAS ESTILO HMI ─── */
+    /* Tarjetas */
     .module-card {
-      background: var(--card);
-      border-radius: 12px;
+      background: var(--surface);
+      border-radius: var(--radius-md);
       padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      border-left: 5px solid var(--blue);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      display: flex; flex-direction: column; gap: 8px;
+      border-left: 4px solid var(--blue);
+      box-shadow: var(--shadow-sm);
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-      -webkit-tap-highlight-color: transparent;
+      transition: transform .15s ease, box-shadow .15s ease, opacity .3s ease;
+      opacity: 0;
+      transform: translateY(8px);
     }
-    .module-card:active { transform: scale(0.96); box-shadow: none; }
-    
-    .module-card.soon { border-left-color: #C5C7D4; }
-    .module-card.soon .icon-box { background: #F1F3F6; filter: grayscale(1); }
+    .module-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .module-card:active { transform: scale(.96); box-shadow: none; }
+    .module-card.soon { border-left-color: #C5C7D4; cursor: default; }
+    .module-card.soon .icon-box { filter: grayscale(1); opacity: .6; }
 
     .card-top { display: flex; align-items: center; gap: 10px; }
-
     .icon-box {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       background: var(--blue-light);
       border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
     }
+    .module-card h3 { font-size: 14px; font-weight: 700; color: var(--text); margin: 0; }
+    .module-card p  { font-size: 10px; color: var(--muted); line-height: 1.3; }
 
-    .module-card h3 { font-size: 14px; font-weight: 800; color: var(--text); margin: 0; }
-    .module-card p { font-size: 10px; color: var(--muted); line-height: 1.2; }
-
-    /* Badges */
+    /* Tags */
     .tag {
-      font-size: 8px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 20px;
-      align-self: flex-start;
+      font-size: 8px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      align-self: flex-start; letter-spacing: .04em;
     }
     .tag.live { background: #E6F6EF; color: #007D43; }
     .tag.soon { background: #F1F3F6; color: #676879; }
 
-    /* ─── NAV INFERIOR (igual a index.html) ─── */
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: calc(64px + env(safe-area-inset-bottom, 0px));
-      background: white;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      flex-shrink: 0;
-      z-index: 100;
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      font-size: 10px;
-      color: var(--muted);
-      font-weight: 600;
-      cursor: pointer;
-      padding: 6px 16px;
-      border-radius: 10px;
-      transition: color 0.2s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .nav-item.active { color: var(--blue); }
-    .nav-item svg {
-      width: 22px;
-      height: 22px;
-      stroke-width: 1.8;
-    }
-
-    /* Desktop Adjustments */
+    /* Desktop */
     @media (min-width: 768px) {
-      .grid { grid-template-columns: repeat(4, 1fr); padding: 0 24px; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px); }
+      .grid { grid-template-columns: repeat(4, 1fr); padding: 0 24px; padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 12px); }
       .stats-row { padding: 20px 24px 0; gap: 20px; }
     }
   </style>
@@ -186,26 +128,41 @@
 <body>
 
   <header class="app-header">
-    <h1>🔧 Mantenimiento PDM</h1>
+    <div class="header-left">
+      <span class="title">🔧 Mantenimiento PDM</span>
+      <span class="subtitle" id="header-rol">—</span>
+    </div>
+    <div class="header-user" id="btn-logout" title="Cerrar sesión">
+      <div class="user-avatar">👤</div>
+      <span id="header-nombre">...</span>
+    </div>
   </header>
 
   <div class="stats-row">
-    <div class="stat-card"><div class="val">12</div><div class="lbl">Equipos</div></div>
-    <div class="stat-card"><div class="val">3</div><div class="lbl">Pendientes</div></div>
-    <div class="stat-card"><div class="val" style="color:var(--success)">98%</div><div class="lbl">Disponibilidad</div></div>
+    <div class="stat-card">
+      <div class="val">12</div>
+      <div class="lbl">Equipos</div>
+    </div>
+    <div class="stat-card">
+      <div class="val">3</div>
+      <div class="lbl">Pendientes</div>
+    </div>
+    <div class="stat-card">
+      <div class="val" style="color:var(--success)">98%</div>
+      <div class="lbl">Disponibilidad</div>
+    </div>
   </div>
 
   <div class="section-title">Módulos de Gestión</div>
 
   <div class="grid" id="mod-grid">
-    
     <div class="module-card" onclick="location.href='modules/hmi/index.html'">
       <div class="card-top">
         <div class="icon-box">🖥️</div>
         <h3>HMI</h3>
       </div>
       <p>Monitoreo de Chillers y Compresores en tiempo real.</p>
-      <span class="tag live">● EN VIVO</span>
+      <span class="tag live">● ACTIVO</span>
     </div>
 
     <div class="module-card soon">
@@ -234,51 +191,60 @@
       <p>Escaneo de activos para recorridos y auditorías.</p>
       <span class="tag soon">PRÓXIMAMENTE</span>
     </div>
-
   </div>
 
   <nav class="bottom-nav">
     <div class="nav-item active">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/>
+      </svg>
       Inicio
     </div>
     <div class="nav-item" onclick="location.href='modules/hmi/index.html'">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
       HMI
     </div>
-    <div class="nav-item" id="nav-cuenta">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+    <div class="nav-item" id="nav-salir">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
       Salir
     </div>
   </nav>
 
   <script>
-    // Lógica de Sesión
-    function checkAuth() {
-      const token = localStorage.getItem('pdm_token');
-      if (!token) location.href = 'index.html';
+    /* ── Sesión ── */
+    function getSession() {
+      try {
+        var raw = localStorage.getItem('pdm_token');
+        if (!raw) return null;
+        var d = JSON.parse(atob(raw));
+        return (d && d.exp && Date.now() < d.exp) ? d : null;
+      } catch (e) { return null; }
     }
-    checkAuth();
 
-    document.getElementById('nav-cuenta').addEventListener('click', () => {
+    var session = getSession();
+    if (!session) { location.href = 'index.html'; }
+
+    /* Mostrar nombre y rol en header */
+    document.getElementById('header-nombre').textContent = session.nombre.split(' ')[0];
+    document.getElementById('header-rol').textContent    = session.rol;
+
+    /* ── Cerrar sesión ── */
+    function logout() {
       if (confirm('¿Cerrar sesión?')) {
         localStorage.removeItem('pdm_token');
         location.href = 'index.html';
       }
-    });
+    }
+    document.getElementById('btn-logout').addEventListener('click', logout);
+    document.getElementById('nav-salir').addEventListener('click', logout);
 
-    // Animación de entrada estilo HMI
-    document.addEventListener('DOMContentLoaded', () => {
-      const cards = document.querySelectorAll('.module-card');
-      cards.forEach((card, i) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(10px)';
-        setTimeout(() => {
-          card.style.transition = 'all 0.4s ease';
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, 100 + (i * 100));
-      });
+    /* ── Animación de entrada ── */
+    document.querySelectorAll('.module-card').forEach(function (card, i) {
+      setTimeout(function () { card.classList.add('visible'); }, 80 + i * 90);
     });
   </script>
 </body>

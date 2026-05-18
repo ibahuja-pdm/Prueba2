@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <!-- ── PWA / iPhone ── -->
+  <!-- PWA / iPhone -->
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,107 +13,281 @@
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
   <link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
-  <link rel="apple-touch-icon" sizes="76x76"  href="icons/icon-76.png">
-  <!-- Splash screens iPhone (mínimo requerido para standalone iOS) -->
+  <link rel="apple-touch-icon" sizes="76x76"   href="icons/icon-76.png">
   <meta name="apple-touch-fullscreen" content="yes">
   <title>PDM — Acceso</title>
   <link rel="stylesheet" href="css/global.css">
   <style>
-    body { background:var(--blue-dark); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
-    .login-wrap { width:100%; max-width:360px; display:flex; flex-direction:column; }
-    .brand { text-align:center; margin-bottom:36px; color:#fff; }
-    .brand .logo-ring { width:72px; height:72px; border-radius:20px; background:rgba(255,255,255,.12); border:1.5px solid rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 16px; }
-    .brand h1 { font-size:1.4rem; font-weight:600; letter-spacing:.02em; }
-    .brand p  { font-size:.82rem; opacity:.6; margin-top:4px; }
-    .login-card { background:var(--surface); border-radius:var(--radius-lg); padding:28px 24px; box-shadow:var(--shadow-lg); }
-    .login-card h2 { font-size:.95rem; font-weight:600; margin-bottom:20px; color:var(--text); }
-    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
-    .field label { font-size:.78rem; font-weight:500; color:var(--text-sub); letter-spacing:.03em; }
-    .field input { border:1.5px solid var(--border); border-radius:var(--radius-sm); padding:11px 14px; font-size:.92rem; color:var(--text); background:var(--surface2); transition:border-color .15s,box-shadow .15s; outline:none; }
-    .field input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(0,74,173,.12); background:#fff; }
-    .btn-login { width:100%; margin-top:8px; background:var(--blue); color:#fff; border-radius:var(--radius-sm); padding:13px; font-size:.95rem; font-weight:600; letter-spacing:.02em; transition:background .15s,transform .1s; }
-    .btn-login:hover  { background:var(--blue-dark); }
-    .btn-login:active { transform:scale(.98); }
-    .error-msg { margin-top:12px; background:#fee2e2; color:#991b1b; border-radius:var(--radius-sm); padding:10px 14px; font-size:.82rem; font-weight:500; display:none; }
-    .error-msg.show { display:block; }
-    .hint { margin-top:16px; padding:12px 14px; background:var(--blue-light); border-radius:var(--radius-sm); font-size:.78rem; color:var(--blue-dark); line-height:1.6; }
-    .hint strong { font-family:var(--mono); font-size:.75rem; }
-    .version { text-align:center; margin-top:20px; font-size:.72rem; color:rgba(255,255,255,.3); }
+    body {
+      background: var(--blue-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 24px;
+    }
+    body.login-body { padding-top: calc(24px + var(--safe-top)); }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Marca */
+    .brand { text-align: center; margin-bottom: 36px; color: #fff; }
+    .brand .logo-ring {
+      width: 72px; height: 72px; border-radius: 20px;
+      background: rgba(255,255,255,.12); border: 1.5px solid rgba(255,255,255,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; margin: 0 auto 16px;
+    }
+    .brand h1 { font-size: 1.4rem; font-weight: 600; letter-spacing: .02em; }
+    .brand p  { font-size: .82rem; opacity: .6; margin-top: 4px; }
+
+    /* Card */
+    .login-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-card h2 {
+      font-size: .95rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    /* Campos */
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .field label {
+      font-size: .78rem; font-weight: 500;
+      color: var(--text-sub); letter-spacing: .03em; text-transform: uppercase;
+    }
+    .field-input-wrap { position: relative; }
+    .field input {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      color: var(--text);
+      background: var(--surface2);
+      transition: border-color .15s, box-shadow .15s;
+      outline: none;
+    }
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,74,173,.12);
+      background: #fff;
+    }
+
+    /* Toggle contraseña */
+    .toggle-pass {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-hint); cursor: pointer;
+      padding: 4px; font-size: 16px;
+      display: flex; align-items: center;
+    }
+    .toggle-pass:focus-visible { outline: 2px solid var(--blue); border-radius: 4px; }
+
+    /* Botón */
+    .btn-login {
+      width: 100%; margin-top: 8px;
+      background: var(--blue); color: #fff;
+      border-radius: var(--radius-sm);
+      padding: 13px;
+      font-size: .95rem; font-weight: 600; letter-spacing: .02em;
+      transition: background .15s, transform .1s, opacity .15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn-login:hover   { background: var(--blue-dark); }
+    .btn-login:active  { transform: scale(.98); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Spinner del botón */
+    .btn-spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn-login.loading .btn-spinner { display: block; }
+    .btn-login.loading .btn-text   { display: none; }
+
+    /* Error */
+    .error-msg {
+      margin-top: 12px;
+      background: #fee2e2; color: #991b1b;
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: .82rem; font-weight: 500;
+      display: none; align-items: center; gap: 8px;
+    }
+    .error-msg.show { display: flex; }
+
+    /* Versión */
+    .version {
+      text-align: center; margin-top: 20px;
+      font-size: .72rem; color: rgba(255,255,255,.3);
+      font-family: var(--mono);
+    }
   </style>
 </head>
-<body>
+<body class="login-body">
   <div class="login-wrap">
     <div class="brand">
       <div class="logo-ring">⚙️</div>
       <h1>Mantenimiento PDM</h1>
-      <p>Sistema de gestion de Mantenimiento PDM</p>
+      <p>Sistema de Gestión de Mantenimiento</p>
     </div>
+
     <div class="login-card">
-      <h2>Iniciar sesion</h2>
+      <h2>Iniciar sesión</h2>
+
       <div class="field">
-        <label>USUARIO</label>
-        <input type="text" id="inp-user" placeholder="usuario" autocomplete="username" autocapitalize="none">
+        <label for="inp-user">Usuario</label>
+        <input type="text" id="inp-user"
+               placeholder="usuario"
+               autocomplete="username"
+               autocapitalize="none"
+               spellcheck="false"
+               aria-label="Usuario">
       </div>
+
       <div class="field">
-        <label>CONTRASENA</label>
-        <input type="password" id="inp-pass" placeholder="••••••••" autocomplete="current-password">
+        <label for="inp-pass">Contraseña</label>
+        <div class="field-input-wrap">
+          <input type="password" id="inp-pass"
+                 placeholder="••••••••"
+                 autocomplete="current-password"
+                 aria-label="Contraseña">
+          <button class="toggle-pass" id="btn-toggle-pass"
+                  type="button"
+                  aria-label="Mostrar contraseña"
+                  title="Mostrar / ocultar contraseña">👁</button>
+        </div>
       </div>
-      <button class="btn-login" id="btn-login">Entrar</button>
-      <div class="error-msg" id="error-msg">Usuario o contrasena incorrectos.</div>
+
+      <button class="btn-login" id="btn-login" type="button">
+        <span class="btn-text">Entrar</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+      </button>
+
+      <div class="error-msg" id="error-msg" role="alert" aria-live="polite">
+        <span>⚠</span>
+        <span id="error-text">Usuario o contraseña incorrectos.</span>
+      </div>
     </div>
-    <div class="version">v0.1.0 - BAhuja</div>
+
+    <div class="version">v0.1.0 · BAhuja</div>
   </div>
 
   <script>
+    /* ── Usuarios (en producción esto debe venir de un backend seguro) ── */
     var USERS = [
-      { usuario:'aa',     password:'aa',  nombre:'Bacilio Ahuja', rol:'SR' },
-      { usuario:'bb', password:'bb', nombre:'Bacilio Ahuja',     rol:'Supervisor' }
+      { usuario: 'aa', password: 'aa', nombre: 'Bacilio Ahuja', rol: 'SR' },
+      { usuario: 'bb', password: 'bb', nombre: 'Bacilio Ahuja', rol: 'Supervisor' },
     ];
 
-    // Si ya hay sesion, ir directo al menu
-    try {
-      var t = localStorage.getItem('pdm_token');
-      if (t) {
-        var d = JSON.parse(atob(t));
-        if (d && d.exp && Date.now() < d.exp) { location.href = 'menu.html'; }
-        else localStorage.removeItem('pdm_token');
+    /* ── Verificar sesión activa ── */
+    (function checkExistingSession() {
+      try {
+        var raw = localStorage.getItem('pdm_token');
+        if (!raw) return;
+        var d = JSON.parse(atob(raw));
+        if (d && d.exp && Date.now() < d.exp) {
+          location.href = 'menu.html';
+        } else {
+          localStorage.removeItem('pdm_token');
+        }
+      } catch (e) {
+        localStorage.removeItem('pdm_token');
       }
-    } catch(e) { localStorage.removeItem('pdm_token'); }
+    })();
 
+    /* ── Toggle contraseña ── */
+    document.getElementById('btn-toggle-pass').addEventListener('click', function () {
+      var inp = document.getElementById('inp-pass');
+      var showing = inp.type === 'text';
+      inp.type = showing ? 'password' : 'text';
+      this.textContent = showing ? '👁' : '🙈';
+      this.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+    });
+
+    /* ── Login ── */
     function doLogin() {
-      var u = document.getElementById('inp-user').value.trim();
-      var p = document.getElementById('inp-pass').value;
+      var u   = document.getElementById('inp-user').value.trim();
+      var p   = document.getElementById('inp-pass').value;
+      var btn = document.getElementById('btn-login');
       var err = document.getElementById('error-msg');
+
       err.classList.remove('show');
 
-      var found = null;
-      for (var i = 0; i < USERS.length; i++) {
-        if (USERS[i].usuario === u && USERS[i].password === p) { found = USERS[i]; break; }
+      if (!u || !p) {
+        document.getElementById('error-text').textContent = 'Ingresa usuario y contraseña.';
+        err.classList.add('show');
+        return;
       }
 
-      if (found) {
-        var data = { usuario:found.usuario, nombre:found.nombre, rol:found.rol, exp: Date.now() + 8*3600*1000 };
-        localStorage.setItem('pdm_token', btoa(JSON.stringify(data)));
-        location.href = 'menu.html';
-      } else {
-        err.classList.add('show');
-        document.getElementById('inp-pass').value = '';
-        document.getElementById('inp-pass').focus();
-      }
+      /* Feedback visual de carga */
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      /* Pequeño retardo para feedback UX */
+      setTimeout(function () {
+        var found = null;
+        for (var i = 0; i < USERS.length; i++) {
+          if (USERS[i].usuario === u && USERS[i].password === p) {
+            found = USERS[i];
+            break;
+          }
+        }
+
+        if (found) {
+          var payload = {
+            usuario: found.usuario,
+            nombre:  found.nombre,
+            rol:     found.rol,
+            exp:     Date.now() + 8 * 3600 * 1000,   /* 8 h */
+          };
+          localStorage.setItem('pdm_token', btoa(JSON.stringify(payload)));
+          location.href = 'menu.html';
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          document.getElementById('error-text').textContent = 'Usuario o contraseña incorrectos.';
+          err.classList.add('show');
+          document.getElementById('inp-pass').value = '';
+          document.getElementById('inp-pass').focus();
+        }
+      }, 300);
     }
 
     document.getElementById('btn-login').addEventListener('click', doLogin);
-    document.getElementById('inp-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
-    document.getElementById('inp-user').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('inp-pass').focus(); });
+    document.getElementById('inp-pass').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('inp-user').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('inp-pass').focus();
+    });
   </script>
 
-  <!-- ── Registro Service Worker ── -->
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
+      window.addEventListener('load', function () {
         navigator.serviceWorker.register('sw.js')
-          .then(function(reg) { console.log('[PDM SW] Registrado:', reg.scope); })
-          .catch(function(err) { console.warn('[PDM SW] Error:', err); });
+          .then(function (reg) { console.log('[PDM SW] Registrado:', reg.scope); })
+          .catch(function (err) { console.warn('[PDM SW] Error:', err); });
       });
     }
   </script>
