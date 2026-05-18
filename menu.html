@@ -88,6 +88,7 @@
       flex: 1;
       overflow-y: auto;
       align-content: start;
+      padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
     }
 
     /* ─── TARJETAS ESTILO HMI ─── */
@@ -98,7 +99,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      border-left: 5px solid var(--blue); /* Identidad HMI */
+      border-left: 5px solid var(--blue);
       box-shadow: 0 2px 6px rgba(0,0,0,0.06);
       cursor: pointer;
       transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -137,9 +138,13 @@
     .tag.live { background: #E6F6EF; color: #007D43; }
     .tag.soon { background: #F1F3F6; color: #676879; }
 
-    /* ─── NAV INFERIOR ─── */
+    /* ─── NAV INFERIOR (igual a index.html) ─── */
     .bottom-nav {
-      height: 64px;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: calc(64px + env(safe-area-inset-bottom, 0px));
       background: white;
       border-top: 1px solid var(--border);
       display: flex;
@@ -147,22 +152,33 @@
       align-items: center;
       padding-bottom: env(safe-area-inset-bottom, 0px);
       flex-shrink: 0;
+      z-index: 100;
     }
     .nav-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       font-size: 10px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 16px;
+      border-radius: 10px;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
     .nav-item.active { color: var(--blue); }
-    .nav-item svg { width: 22px; height: 22px; }
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      stroke-width: 1.8;
+    }
 
     /* Desktop Adjustments */
     @media (min-width: 768px) {
-      .grid { grid-template-columns: repeat(4, 1fr); padding: 0 24px; }
+      .grid { grid-template-columns: repeat(4, 1fr); padding: 0 24px; padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px); }
       .stats-row { padding: 20px 24px 0; gap: 20px; }
     }
   </style>
@@ -223,15 +239,15 @@
 
   <nav class="bottom-nav">
     <div class="nav-item active">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
       Inicio
     </div>
-    <div class="nav-item" onclick="alert('Sin alertas nuevas')">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-      Alertas
+    <div class="nav-item" onclick="location.href='modules/hmi/index.html'">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      HMI
     </div>
     <div class="nav-item" id="nav-cuenta">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
       Salir
     </div>
   </nav>
