@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <link rel="manifest" href="../../manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PDM">
+  <meta name="theme-color" content="#004aad">
+  <link rel="apple-touch-icon" href="../../icons/icon-180.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="../../icons/icon-152.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="../../icons/icon-120.png">
+  <link rel="apple-touch-icon" sizes="76x76"  href="../../icons/icon-76.png">
+  <meta name="apple-touch-fullscreen" content="yes">
+  <title>PDM — Checklist</title>
+  <link rel="stylesheet" href="../../css/global.css">
+
+  <style>
+    /* ── PAGE ── */
+    .page { padding: 14px 14px calc(var(--nav-h) + var(--safe-bottom) + 14px); }
+
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: 6px;
+      background: var(--surface); border-radius: var(--radius-md);
+      padding: 4px; margin-bottom: 16px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .tab-btn {
+      flex: 1; padding: 9px 4px;
+      border-radius: 9px;
+      font-size: .75rem; font-weight: 600;
+      letter-spacing: .02em; color: var(--text-sub);
+      transition: all .18s;
+    }
+    .tab-btn.active {
+      background: var(--blue); color: #fff;
+      box-shadow: 0 2px 8px rgba(0,74,173,.25);
+    }
+
+    /* ── FORM CARD ── */
+    .form-card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .form-card-header {
+      background: var(--blue);
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .form-card-header .card-icon {
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,.15);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .form-card-header .card-title { color: #fff; font-size: .92rem; font-weight: 600; }
+    .form-card-header .card-sub   { color: rgba(255,255,255,.65); font-size: .72rem; margin-top: 1px; }
+    .form-card-body { padding: 16px 18px; }
+
+    /* ── FIELD ── */
+    .field { margin-bottom: 14px; }
+    .field:last-child { margin-bottom: 0; }
+    .field label {
+      display: block;
+      font-size: .72rem; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      color: var(--text-sub); margin-bottom: 6px;
+    }
+    .field label .req { color: var(--danger); margin-left: 2px; }
+
+    /* Inputs / Selects / Textarea */
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      color: var(--text);
+      transition: border-color .15s, box-shadow .15s, background .15s;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(0,74,173,.10);
+      background: #fff;
+    }
+    .field input.error,
+    .field select.error,
+    .field textarea.error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(217,48,37,.10);
+    }
+    .field textarea { resize: none; min-height: 80px; line-height: 1.5; }
+    .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%235a6a85'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 18px; padding-right: 36px; }
+    .field-error { font-size: .72rem; color: var(--danger); margin-top: 5px; display: none; }
+    .field-error.show { display: block; }
+
+    /* ── FIELD ROW (dos columnas) ── */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .field-row .field { margin-bottom: 0; }
+
+    /* ── ESTADO VISUAL ── */
+    .estado-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+    }
+    .estado-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; padding: 12px 6px;
+      border-radius: var(--radius-md);
+      border: 2px solid var(--border);
+      background: var(--surface2);
+      transition: all .18s; cursor: pointer;
+      font-size: .72rem; font-weight: 600; letter-spacing: .02em;
+      color: var(--text-sub);
+    }
+    .estado-btn .estado-icon { font-size: 22px; }
+    .estado-btn[data-val="operativo"].selected  { border-color: var(--success); background: #e1f5ee; color: #0f6e56; }
+    .estado-btn[data-val="alerta"].selected     { border-color: var(--warning); background: #fef3c7; color: #92400e; }
+    .estado-btn[data-val="falla"].selected      { border-color: var(--danger);  background: #fee2e2; color: #991b1b; }
+    .estado-btn[data-val="mantenimiento"].selected { border-color: var(--blue); background: var(--blue-light); color: var(--blue); }
+    .estado-btn[data-val="apagado"].selected    { border-color: #9baabb; background: #f1efea; color: #4a5568; }
+    .estado-btn[data-val="standby"].selected    { border-color: #7c3aed; background: #f5f3ff; color: #5b21b6; }
+
+    /* ── UNIDAD ── */
+    .input-unit-wrap { position: relative; }
+    .input-unit-wrap input { padding-right: 48px; }
+    .input-unit {
+      position: absolute; right: 0; top: 0; bottom: 0;
+      display: flex; align-items: center; padding: 0 13px;
+      font-size: .75rem; font-weight: 600; color: var(--text-hint);
+      font-family: var(--mono); pointer-events: none;
+      border-left: 1px solid var(--border);
+    }
+
+    /* ── SUBMIT ── */
+    .btn-submit {
+      width: 100%; padding: 15px;
+      background: var(--blue); color: #fff;
+      border-radius: var(--radius-md);
+      font-size: .95rem; font-weight: 700; letter-spacing: .03em;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: background .15s, transform .1s, opacity .15s;
+      box-shadow: 0 4px 14px rgba(0,74,173,.3);
+    }
+    .btn-submit:hover:not(:disabled)  { background: var(--blue-dark); }
+    .btn-submit:active:not(:disabled) { transform: scale(.98); }
+    .btn-submit:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
+    .btn-submit.loading .btn-spinner { display: block; }
+    .btn-submit.loading .btn-text    { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: calc(var(--nav-h) + var(--safe-bottom) + 14px);
+      left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--text); color: #fff;
+      padding: 12px 20px; border-radius: var(--radius-md);
+      font-size: .85rem; font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      display: flex; align-items: center; gap: 10px;
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s, transform .25s;
+      z-index: 500; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+
+    /* ── HISTORIAL ── */
+    #tab-historial { display: none; }
+    .hist-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .hist-count { font-size: .78rem; color: var(--text-hint); font-family: var(--mono); }
+    .btn-filter {
+      font-size: .75rem; font-weight: 500; color: var(--blue);
+      background: var(--blue-light); padding: 5px 12px; border-radius: 20px;
+    }
+    .hist-empty {
+      text-align: center; padding: 48px 20px;
+      color: var(--text-hint); font-size: .85rem;
+    }
+    .hist-empty .icon { font-size: 40px; margin-bottom: 12px; opacity: .5; }
+    .registro-card {
+      background: var(--surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px; overflow: hidden;
+      transition: box-shadow .15s;
+    }
+    .registro-card:active { box-shadow: var(--shadow-md); }
+    .reg-header {
+      padding: 12px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+    }
+    .reg-id   { font-size: .88rem; font-weight: 700; font-family: var(--mono); color: var(--text); }
+    .reg-ts   { font-size: .68rem; color: var(--text-hint); margin-top: 2px; }
+    .reg-body { padding: 10px 16px; }
+    .reg-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px 16px; }
+    .reg-field { font-size: .75rem; }
+    .reg-field .lbl { color: var(--text-hint); font-size: .65rem; letter-spacing: .04em; text-transform: uppercase; }
+    .reg-field .val { color: var(--text); font-weight: 500; font-family: var(--mono); }
+    .reg-obs { font-size: .78rem; color: var(--text-sub); padding: 8px 16px 12px; line-height: 1.5; border-top: 1px solid var(--border); }
+    .reg-obs .obs-lbl { font-size: .65rem; font-weight: 600; letter-spacing: .05em; color: var(--text-hint); text-transform: uppercase; margin-bottom: 3px; }
+
+    /* ── SECTION DIVIDER ── */
+    .section-label {
+      font-size: .68rem; font-weight: 700; letter-spacing: .1em;
+      color: var(--text-hint); text-transform: uppercase;
+      margin: 4px 0 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <a href="../../menu.html" class="back-btn">&#8592;</a>
+    <h1>&#9989; Checklist Equipos</h1>
+    <span class="badge">PDM</span>
+  </header>
+
+  <div class="page">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-btn-nuevo"    onclick="showTab('nuevo')">+ Nuevo Registro</button>
+      <button class="tab-btn"        id="tab-btn-historial" onclick="showTab('historial')">📋 Historial</button>
+    </div>
+
+    <!-- ══════════════════════════════════ TAB: NUEVO ══════════════════════════════════ -->
+    <div id="tab-nuevo">
+
+      <!-- IDENTIFICACIÓN -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon">🏷️</div>
+          <div>
+            <div class="card-title">Identificación</div>
+            <div class="card-sub">Datos del equipo inspeccionado</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+
+          <div class="field">
+            <label>ID del Equipo <span class="req">*</span></label>
+            <select id="f-equipo">
+              <option value="">— Seleccionar equipo —</option>
+              <option value="COMP-01">COMP-01 · Compresor #1</option>
+              <option value="PUMP-02">PUMP-02 · Bomba centrífuga</option>
+              <option value="MOTOR-03">MOTOR-03 · Motor principal</option>
+              <option value="CHILL-04">CHILL-04 · Chiller</option>
+              <option value="CONV-05">CONV-05 · Banda transportadora</option>
+              <option value="PUMP-06">PUMP-06 · Bomba auxiliar</option>
+            </select>
+            <div class="field-error" id="err-equipo">Selecciona un equipo.</div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Fecha <span class="req">*</span></label>
+              <input type="date" id="f-fecha">
+            </div>
+            <div class="field">
+              <label>Hora <span class="req">*</span></label>
+              <input type="time" id="f-hora">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Operador</label>
+            <input type="text" id="f-operador" placeholder="Nombre del técnico" readonly style="background:var(--surface2);color:var(--text-hint);">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ESTADO -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon">📊</div>
+          <div>
+            <div class="card-title">Estado del Equipo</div>
+            <div class="card-sub">Condición operativa actual</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="estado-grid" id="estado-grid">
+            <button class="estado-btn" data-val="operativo"     onclick="selectEstado(this)"><span class="estado-icon">🟢</span>Operativo</button>
+            <button class="estado-btn" data-val="alerta"        onclick="selectEstado(this)"><span class="estado-icon">🟡</span>Alerta</button>
+            <button class="estado-btn" data-val="falla"         onclick="selectEstado(this)"><span class="estado-icon">🔴</span>Falla</button>
+            <button class="estado-btn" data-val="mantenimiento" onclick="selectEstado(this)"><span class="estado-icon">🔧</span>Mtto.</button>
+            <button class="estado-btn" data-val="standby"       onclick="selectEstado(this)"><span class="estado-icon">🟣</span>Standby</button>
+            <button class="estado-btn" data-val="apagado"       onclick="selectEstado(this)"><span class="estado-icon">⚫</span>Apagado</button>
+          </div>
+          <div class="field-error" id="err-estado" style="margin-top:8px;">Selecciona el estado del equipo.</div>
+        </div>
+      </div>
+
+      <!-- TEMPERATURAS -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon">🌡️</div>
+          <div>
+            <div class="card-title">Temperaturas</div>
+            <div class="card-sub">Lectura en °C</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>T. Entrada <span class="req">*</span></label>
+              <div class="input-unit-wrap">
+                <input type="number" id="f-temp-entrada" placeholder="0.0" step="0.1" inputmode="decimal">
+                <span class="input-unit">°C</span>
+              </div>
+              <div class="field-error" id="err-temp-entrada">Valor requerido.</div>
+            </div>
+            <div class="field">
+              <label>T. Salida <span class="req">*</span></label>
+              <div class="input-unit-wrap">
+                <input type="number" id="f-temp-salida" placeholder="0.0" step="0.1" inputmode="decimal">
+                <span class="input-unit">°C</span>
+              </div>
+              <div class="field-error" id="err-temp-salida">Valor requerido.</div>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <div id="delta-temp" style="font-size:.78rem;color:var(--text-hint);font-family:var(--mono);text-align:right;min-height:20px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRESIONES -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon">💨</div>
+          <div>
+            <div class="card-title">Presiones</div>
+            <div class="card-sub">Lectura en PSI</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="field-row">
+            <div class="field">
+              <label>P. Entrada <span class="req">*</span></label>
+              <div class="input-unit-wrap">
+                <input type="number" id="f-pres-entrada" placeholder="0.0" step="0.1" inputmode="decimal">
+                <span class="input-unit">PSI</span>
+              </div>
+              <div class="field-error" id="err-pres-entrada">Valor requerido.</div>
+            </div>
+            <div class="field">
+              <label>P. Salida <span class="req">*</span></label>
+              <div class="input-unit-wrap">
+                <input type="number" id="f-pres-salida" placeholder="0.0" step="0.1" inputmode="decimal">
+                <span class="input-unit">PSI</span>
+              </div>
+              <div class="field-error" id="err-pres-salida">Valor requerido.</div>
+            </div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <div id="delta-pres" style="font-size:.78rem;color:var(--text-hint);font-family:var(--mono);text-align:right;min-height:20px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OBSERVACIONES -->
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="card-icon">📝</div>
+          <div>
+            <div class="card-title">Observaciones</div>
+            <div class="card-sub">Notas adicionales del técnico</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="field" style="margin-bottom:0">
+            <textarea id="f-obs" placeholder="Describe anomalías, ruidos, vibraciones, condiciones inusuales..." maxlength="500"></textarea>
+            <div style="text-align:right;font-size:.68rem;color:var(--text-hint);margin-top:4px;font-family:var(--mono)">
+              <span id="obs-counter">0</span>/500
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GUARDAR -->
+      <button class="btn-submit" id="btn-guardar" onclick="guardarRegistro()">
+        <span class="btn-text">💾 &nbsp;Guardar Registro</span>
+        <span class="btn-spinner"></span>
+      </button>
+
+    </div>
+    <!-- ══════════════════════════════════ FIN TAB NUEVO ══════════════════════════════════ -->
+
+
+    <!-- ══════════════════════════════════ TAB: HISTORIAL ══════════════════════════════════ -->
+    <div id="tab-historial">
+      <div class="hist-header">
+        <span class="hist-count" id="hist-count">0 registros</span>
+        <button class="btn-filter" onclick="cargarHistorial()">↺ Actualizar</button>
+      </div>
+      <div id="hist-list">
+        <div class="hist-empty">
+          <div class="icon">📋</div>
+          Cargando registros...
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /page -->
+
+
+  <!-- ── TOAST ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── NAV INFERIOR ── -->
+  <nav class="bottom-nav">
+    <div class="nav-item active">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+      Checklist
+    </div>
+    <div class="nav-item" onclick="location.href='../../menu.html'">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/></svg>
+      Inicio
+    </div>
+    <div class="nav-item" onclick="if(confirm('¿Cerrar sesión?')){localStorage.removeItem('pdm_token');location.href='../../index.html';}">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+      Salir
+    </div>
+  </nav>
+
+
+  <!-- ══════════════════════════════════════════════════════════
+       SUPABASE — configuración activa
+  ══════════════════════════════════════════════════════════ -->
+  <script>
+    var SUPABASE_URL = 'https://efffrroxyfljywtmcfin.supabase.co';
+    var SUPABASE_KEY = 'sb_publishable_Wz86Dr1r3_To2m8gRmyl5w__8dRlZmh';
+
+    /* ── Guardar registro en Supabase ── */
+    window.__supabaseInsert = async function(registro) {
+      var res = await fetch(SUPABASE_URL + '/rest/v1/checklist', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify({
+          equipo_id:     registro.equipoId,
+          fecha:         registro.fecha,
+          hora:          registro.hora,
+          operador:      registro.operador,
+          estado:        registro.estado,
+          temp_entrada:  registro.tempEntrada,
+          temp_salida:   registro.tempSalida,
+          pres_entrada:  registro.presEntrada,
+          pres_salida:   registro.presSalida,
+          observaciones: registro.observaciones
+        })
+      });
+      if (!res.ok) { var err = await res.text(); throw new Error(err); }
+      return await res.json();
+    };
+
+    /* ── Leer registros de Supabase ── */
+    window.__supabaseSelect = async function() {
+      var res = await fetch(
+        SUPABASE_URL + '/rest/v1/checklist?order=creado_en.desc&limit=100',
+        {
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + SUPABASE_KEY
+          }
+        }
+      );
+      if (!res.ok) { var err = await res.text(); throw new Error(err); }
+      return await res.json();
+    };
+  </script>
+
+  <!-- ══════════════════════════════════════════════════════════
+       LÓGICA DE LA PÁGINA (vanilla JS compatible con PWA)
+  ══════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Auth check ── */
+    var SESSION_USER = null;
+    (function() {
+      try {
+        var t = localStorage.getItem('pdm_token');
+        if (!t) { location.href='../../index.html'; return; }
+        var d = JSON.parse(atob(t));
+        if (!d || Date.now() > d.exp) { localStorage.removeItem('pdm_token'); location.href='../../index.html'; return; }
+        SESSION_USER = d;
+      } catch(e) { location.href='../../index.html'; }
+    })();
+
+    /* ── Prellenar operador y fecha/hora ── */
+    (function() {
+      if (SESSION_USER) {
+        document.getElementById('f-operador').value = SESSION_USER.nombre || SESSION_USER.usuario || '';
+      }
+      var now = new Date();
+      var pad = function(n){ return String(n).padStart(2,'0'); };
+      document.getElementById('f-fecha').value = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+      document.getElementById('f-hora').value  = pad(now.getHours())+':'+pad(now.getMinutes());
+    })();
+
+    /* ── Estado seleccionado ── */
+    var estadoSeleccionado = '';
+    function selectEstado(btn) {
+      document.querySelectorAll('.estado-btn').forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      estadoSeleccionado = btn.dataset.val;
+      document.getElementById('err-estado').classList.remove('show');
+    }
+
+    /* ── Delta temperaturas ── */
+    function calcDelta() {
+      var tin  = parseFloat(document.getElementById('f-temp-entrada').value);
+      var tout = parseFloat(document.getElementById('f-temp-salida').value);
+      var el   = document.getElementById('delta-temp');
+      if (!isNaN(tin) && !isNaN(tout)) {
+        var d = (tout - tin).toFixed(1);
+        el.textContent = 'ΔT = ' + (d > 0 ? '+' : '') + d + ' °C';
+        el.style.color = Math.abs(d) > 20 ? 'var(--danger)' : Math.abs(d) > 10 ? 'var(--warning)' : 'var(--success)';
+      } else { el.textContent = ''; }
+    }
+    document.getElementById('f-temp-entrada').addEventListener('input', calcDelta);
+    document.getElementById('f-temp-salida').addEventListener('input', calcDelta);
+
+    /* ── Delta presiones ── */
+    function calcDeltaPres() {
+      var pin  = parseFloat(document.getElementById('f-pres-entrada').value);
+      var pout = parseFloat(document.getElementById('f-pres-salida').value);
+      var el   = document.getElementById('delta-pres');
+      if (!isNaN(pin) && !isNaN(pout)) {
+        var d = (pout - pin).toFixed(1);
+        el.textContent = 'ΔP = ' + (d > 0 ? '+' : '') + d + ' PSI';
+        el.style.color = Math.abs(d) > 30 ? 'var(--danger)' : Math.abs(d) > 15 ? 'var(--warning)' : 'var(--success)';
+      } else { el.textContent = ''; }
+    }
+    document.getElementById('f-pres-entrada').addEventListener('input', calcDeltaPres);
+    document.getElementById('f-pres-salida').addEventListener('input', calcDeltaPres);
+
+    /* ── Contador observaciones ── */
+    document.getElementById('f-obs').addEventListener('input', function() {
+      document.getElementById('obs-counter').textContent = this.value.length;
+    });
+
+    /* ── TABS ── */
+    function showTab(tab) {
+      document.getElementById('tab-nuevo').style.display     = tab==='nuevo'     ? 'block' : 'none';
+      document.getElementById('tab-historial').style.display = tab==='historial' ? 'block' : 'none';
+      document.getElementById('tab-btn-nuevo').classList.toggle('active',    tab==='nuevo');
+      document.getElementById('tab-btn-historial').classList.toggle('active', tab==='historial');
+      if (tab==='historial') cargarHistorial();
+    }
+
+    /* ── Toast ── */
+    var toastTimer;
+    function showToast(msg, tipo) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = 'toast ' + (tipo||'');
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function(){ el.classList.remove('show'); }, 3000);
+    }
+
+    /* ── Validación ── */
+    function validar() {
+      var ok = true;
+      function check(id, errId, cond) {
+        var el  = document.getElementById(id);
+        var err = document.getElementById(errId);
+        if (!cond(el ? el.value : '')) {
+          if (el) el.classList.add('error');
+          if (err) err.classList.add('show');
+          ok = false;
+        } else {
+          if (el) el.classList.remove('error');
+          if (err) err.classList.remove('show');
+        }
+      }
+      check('f-equipo',      'err-equipo',      function(v){ return v !== ''; });
+      check('f-temp-entrada','err-temp-entrada', function(v){ return v !== '' && !isNaN(parseFloat(v)); });
+      check('f-temp-salida', 'err-temp-salida',  function(v){ return v !== '' && !isNaN(parseFloat(v)); });
+      check('f-pres-entrada','err-pres-entrada', function(v){ return v !== '' && !isNaN(parseFloat(v)); });
+      check('f-pres-salida', 'err-pres-salida',  function(v){ return v !== '' && !isNaN(parseFloat(v)); });
+      if (!estadoSeleccionado) {
+        document.getElementById('err-estado').classList.add('show');
+        ok = false;
+      }
+      return ok;
+    }
+
+    /* ── Construir objeto de registro ── */
+    function buildRegistro() {
+      return {
+        equipoId:     document.getElementById('f-equipo').value,
+        fecha:        document.getElementById('f-fecha').value,
+        hora:         document.getElementById('f-hora').value,
+        operador:     document.getElementById('f-operador').value,
+        estado:       estadoSeleccionado,
+        tempEntrada:  parseFloat(document.getElementById('f-temp-entrada').value),
+        tempSalida:   parseFloat(document.getElementById('f-temp-salida').value),
+        presEntrada:  parseFloat(document.getElementById('f-pres-entrada').value),
+        presSalida:   parseFloat(document.getElementById('f-pres-salida').value),
+        observaciones:document.getElementById('f-obs').value.trim(),
+        creadoEn:     new Date().toISOString()
+      };
+    }
+
+    /* ── GUARDAR REGISTRO ── */
+    async function guardarRegistro() {
+      if (!validar()) {
+        showToast('⚠ Completa los campos obligatorios', 'error');
+        return;
+      }
+      var btn = document.getElementById('btn-guardar');
+      btn.disabled = true;
+      btn.classList.add('loading');
+
+      var registro = buildRegistro();
+
+      try {
+        await window.__supabaseInsert(registro);
+        showToast('✅ Registro guardado en Supabase', 'success');
+        resetForm();
+      } catch(e) {
+        console.error(e);
+        showToast('❌ Error al guardar: ' + (e.message || 'revisa la consola'), 'error');
+      }
+      btn.disabled = false;
+      btn.classList.remove('loading');
+    }
+
+    /* ── Reset formulario ── */
+    function resetForm() {
+      document.getElementById('f-equipo').value      = '';
+      document.getElementById('f-temp-entrada').value = '';
+      document.getElementById('f-temp-salida').value  = '';
+      document.getElementById('f-pres-entrada').value = '';
+      document.getElementById('f-pres-salida').value  = '';
+      document.getElementById('f-obs').value          = '';
+      document.getElementById('obs-counter').textContent = '0';
+      document.getElementById('delta-temp').textContent  = '';
+      document.getElementById('delta-pres').textContent  = '';
+      estadoSeleccionado = '';
+      document.querySelectorAll('.estado-btn').forEach(function(b){ b.classList.remove('selected'); });
+      // Actualizar fecha/hora
+      var now = new Date(); var pad = function(n){ return String(n).padStart(2,'0'); };
+      document.getElementById('f-fecha').value = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+      document.getElementById('f-hora').value  = pad(now.getHours())+':'+pad(now.getMinutes());
+      // Scroll al tope
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── CARGAR HISTORIAL ── */
+    async function cargarHistorial() {
+      var list = document.getElementById('hist-list');
+      list.innerHTML = '<div class="hist-empty"><div class="icon">⏳</div>Cargando...</div>';
+
+      try {
+        var rows = await window.__supabaseSelect();
+        // Mapear columnas de Supabase al formato del render
+        var registros = rows.map(function(r) {
+          return {
+            id:            r.id,
+            equipoId:      r.equipo_id,
+            fecha:         r.fecha,
+            hora:          r.hora,
+            operador:      r.operador,
+            estado:        r.estado,
+            tempEntrada:   r.temp_entrada,
+            tempSalida:    r.temp_salida,
+            presEntrada:   r.pres_entrada,
+            presSalida:    r.pres_salida,
+            observaciones: r.observaciones
+          };
+        });
+        renderHistorial(registros);
+      } catch(e) {
+        console.error(e);
+        list.innerHTML = '<div class="hist-empty"><div class="icon">❌</div>Error al cargar: ' + (e.message||'') + '</div>';
+      }
+    }
+
+    /* ── RENDER HISTORIAL ── */
+    var ESTADO_LABEL = {
+      operativo:'🟢 Operativo', alerta:'🟡 Alerta', falla:'🔴 Falla',
+      mantenimiento:'🔧 Mtto.', standby:'🟣 Standby', apagado:'⚫ Apagado'
+    };
+    function renderHistorial(registros) {
+      var list = document.getElementById('hist-list');
+      document.getElementById('hist-count').textContent = registros.length + ' registro' + (registros.length!==1?'s':'');
+
+      if (!registros.length) {
+        list.innerHTML = '<div class="hist-empty"><div class="icon">📋</div>No hay registros aún.<br>Crea el primer checklist.</div>';
+        return;
+      }
+
+      list.innerHTML = registros.map(function(r) {
+        var obs = r.observaciones
+          ? '<div class="reg-obs"><div class="obs-lbl">Observaciones</div>'+escHtml(r.observaciones)+'</div>'
+          : '';
+        return '<div class="registro-card">'
+          +'<div class="reg-header">'
+          +'  <div><div class="reg-id">'+escHtml(r.equipoId)+'</div><div class="reg-ts">'+escHtml(r.fecha)+' · '+escHtml(r.hora)+'  ·  '+escHtml(r.operador||'—')+'</div></div>'
+          +'  <span class="pill '+estadoPill(r.estado)+'">'+escHtml(ESTADO_LABEL[r.estado]||r.estado)+'</span>'
+          +'</div>'
+          +'<div class="reg-body"><div class="reg-grid">'
+          +'  <div class="reg-field"><div class="lbl">T. Entrada</div><div class="val">'+r.tempEntrada+' °C</div></div>'
+          +'  <div class="reg-field"><div class="lbl">T. Salida</div><div class="val">'+r.tempSalida+' °C</div></div>'
+          +'  <div class="reg-field"><div class="lbl">P. Entrada</div><div class="val">'+r.presEntrada+' PSI</div></div>'
+          +'  <div class="reg-field"><div class="lbl">P. Salida</div><div class="val">'+r.presSalida+' PSI</div></div>'
+          +'</div></div>'
+          + obs
+          +'</div>';
+      }).join('');
+    }
+
+    function estadoPill(e) {
+      return {operativo:'ok',alerta:'warn',falla:'err',mantenimiento:'',standby:'',apagado:'off'}[e] || '';
+    }
+    function escHtml(s) {
+      return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Exponer para los onclick en HTML
+    window.showTab        = showTab;
+    window.selectEstado   = selectEstado;
+    window.guardarRegistro= guardarRegistro;
+    window.cargarHistorial= cargarHistorial;
+  </script>
+
+  <!-- ── Service Worker ── -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('../../sw.js')
+          .then(function(r){ console.log('[PDM SW]', r.scope); })
+          .catch(function(e){ console.warn('[PDM SW] Error:', e); });
+      });
+    }
+  </script>
+
+</body>
+</html>
