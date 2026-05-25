@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SCI — Sistema Contra Incendio</title>
   <link rel="stylesheet" href="../../css/global.css">
   <style>
@@ -229,6 +230,47 @@
     .s6 { fill: none; stroke: #ff00ff; stroke-linecap: round; stroke-linejoin: round; stroke-width: .4; }
     .t7 { font-size: 3px; fill: #ff00ff; font-family: "Arial"; }
     .t8 { font-size: 5px; fill: #545454; font-style: italic; font-family: "Arial"; }
+
+    /* ── MÓVIL VERTICAL (portrait) ── */
+    @media (max-width: 600px) and (orientation: portrait) {
+      header h2 { font-size: 13px; }
+      header { padding: 8px 12px; gap: 10px; }
+      header img { height: 28px; }
+
+      .toolbar {
+        padding: 6px 10px;
+        gap: 6px;
+        justify-content: space-between;
+      }
+      .toolbar input { width: 120px; font-size: 13px; }
+      .toolbar button { font-size: 13px; padding: 6px 10px; }
+      .zoom-controls { display: none; }
+
+      /* Plano: permite scroll horizontal y vertical */
+      #plano {
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y;
+      }
+
+      /* Minimapa: esquina inferior derecha en portrait para no tapar toolbar */
+      #minimapa {
+        left: auto;
+        right: 16px;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
+        width: 180px;
+        height: 120px;
+      }
+
+      /* Panel de info: ocupa ancho completo en portrait */
+      #info {
+        right: 8px;
+        left: 8px;
+        width: auto;
+        top: auto;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
+      }
+    }
   </style>
 </head>
 <body>
@@ -1141,7 +1183,9 @@
       const newScrollLeft = (plano.scrollLeft + px) * ratio - px;
       const newScrollTop = (plano.scrollTop + py) * ratio - py;
 
-      contenedor.style.transform = `scale(${scale})`;
+      contenedor.style.transform = isPortrait()
+        ? `rotate(90deg) translateY(-100%) scale(${scale})`
+        : `scale(${scale})`;
       plano.scrollLeft = newScrollLeft;
       plano.scrollTop = newScrollTop;
       updateZoomLabel();
@@ -1152,12 +1196,27 @@
       if (window.mostrarMinimapa) window.mostrarMinimapa();
     }
 
+    function isPortrait() {
+      return window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches;
+    }
+
     function fitToScreen() {
       const pRect = plano.getBoundingClientRect();
-      const scaleX = pRect.width / SVG_W;
-      const scaleY = pRect.height / SVG_H;
+      let fitW, fitH;
+      if (isPortrait()) {
+        // SVG está rotado 90°: sus dimensiones efectivas se invierten
+        fitW = SVG_H;
+        fitH = SVG_W;
+      } else {
+        fitW = SVG_W;
+        fitH = SVG_H;
+      }
+      const scaleX = pRect.width / fitW;
+      const scaleY = pRect.height / fitH;
       scale = Math.min(scaleX, scaleY) * 0.96;
-      contenedor.style.transform = `scale(${scale})`;
+      contenedor.style.transform = isPortrait()
+        ? `rotate(90deg) translateY(-100%) scale(${scale})`
+        : `scale(${scale})`;
       plano.scrollLeft = 0;
       plano.scrollTop = 0;
       updateZoomLabel();
@@ -1611,6 +1670,11 @@
       setInterval(() => { if (mmVisible && !mmCollapsed) renderMinimap(); }, 4000);
     })();
     // ─────────────────────────────────────────────────────
+
+    // Recalcular fit al rotar el dispositivo
+    window.addEventListener("resize", () => {
+      fitToScreen();
+    });
 
     window.addEventListener("load", () => {
       const svg = document.querySelector("#contenedorSVG svg");
