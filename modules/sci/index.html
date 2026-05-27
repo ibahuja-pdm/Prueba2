@@ -66,36 +66,14 @@
       background: #666;
     }
     .toolbar button.secondary:hover { background: #444; }
-    .zoom-controls {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-left: auto;
-      border-left: 1px solid #eee;
-      padding-left: 12px;
-    }
-    .zoom-controls button {
-      width: 30px;
-      height: 30px;
-      padding: 0;
-      font-size: 18px;
-      line-height: 1;
-      border-radius: 4px;
-    }
-    .zoom-label {
-      font-size: 13px;
-      color: #555;
-      min-width: 44px;
-      text-align: center;
-    }
 
     #plano {
       flex: 1;
       overflow: auto;
       background: #e8e8e8;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      align-items: flex-start;
+      justify-content: flex-start;
       cursor: grab;
       user-select: none;
       position: relative;
@@ -103,7 +81,7 @@
     #plano.panning { cursor: grabbing; }
 
     #contenedorSVG {
-      transform-origin: center center;
+      transform-origin: 0 0;
       display: inline-block;
       flex-shrink: 0;
     }
@@ -153,7 +131,7 @@
     }
     #info .close-btn:hover { background: #555; }
 
-    /* ── MINIMAPA ── */
+    
     #minimapa {
       position: fixed;
       bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
@@ -220,18 +198,9 @@
     #minimapa.collapsed canvas,
     #minimapa.collapsed #minimapa-visor { display: none; }
 
-    tspan { white-space: pre; }
-    .s0 { fill: none; stroke: #767676; stroke-linecap: round; stroke-linejoin: round; stroke-width: .4; }
-    .t1 { font-size: 2px; fill: #767676; font-family: "Sans Serif"; }
-    .s2 { fill: none; stroke: #0000ff; stroke-linecap: round; stroke-linejoin: round; stroke-width: .4; }
-    .t3 { font-size: 3px; fill: #0000ff; font-family: "Arial"; }
-    .s4 { fill: none; stroke: #ff0000; stroke-linecap: round; stroke-linejoin: round; stroke-width: .4; }
-    .t5 { font-size: 3px; fill: #ff0000; font-family: "Arial"; }
-    .s6 { fill: none; stroke: #ff00ff; stroke-linecap: round; stroke-linejoin: round; stroke-width: .4; }
-    .t7 { font-size: 3px; fill: #ff00ff; font-family: "Arial"; }
-    .t8 { font-size: 5px; fill: #545454; font-style: italic; font-family: "Arial"; }
+    
 
-    /* ── MÓVIL VERTICAL (portrait) ── */
+    
     @media (max-width: 600px) and (orientation: portrait) {
       header h2 { font-size: 13px; }
       header { padding: 8px 12px; gap: 10px; }
@@ -244,16 +213,15 @@
       }
       .toolbar input { width: 120px; font-size: 13px; }
       .toolbar button { font-size: 13px; padding: 6px 10px; }
-      .zoom-controls { display: none; }
 
-      /* Plano: permite scroll horizontal y vertical */
+      
       #plano {
         overflow: auto;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x pan-y;
       }
 
-      /* Minimapa: esquina inferior derecha en portrait para no tapar toolbar */
+      
       #minimapa {
         left: auto;
         right: 16px;
@@ -262,9 +230,13 @@
         height: 120px;
       }
 
-      /* Panel de info: oculto en portrait móvil */
+      
       #info {
-        display: none !important;
+        right: 8px;
+        left: 8px;
+        width: auto;
+        top: auto;
+        bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 8px);
       }
     }
   </style>
@@ -283,7 +255,7 @@
       onkeydown="if(event.key==='Enter') buscar()">
     <button onclick="buscar()">Buscar</button>
     <button class="secondary" onclick="reiniciar()">Ajustar</button>
-    <span id="zoomLabel" style="display:none"></span>
+
   </div>
 
   <div id="plano">
@@ -1141,8 +1113,7 @@
     <button class="close-btn" onclick="cerrarInfo()">Cerrar</button>
   </div>
 
-
-  <!-- MINIMAPA -->
+  
   <div id="minimapa">
     <div id="minimapa-header">
       <span>&#x1F5FA; VISTA GENERAL</span>
@@ -1162,10 +1133,6 @@
     const plano = document.getElementById("plano");
     const contenedor = document.getElementById("contenedorSVG");
 
-    function updateZoomLabel() {
-      document.getElementById("zoomLabel").textContent = Math.round(scale * 100) + "%";
-    }
-
     function applyScale(newScale, pivotX, pivotY) {
       const oldScale = scale;
       scale = Math.max(0.5, Math.min(newScale, 10));
@@ -1184,12 +1151,7 @@
         : `scale(${scale})`;
       plano.scrollLeft = newScrollLeft;
       plano.scrollTop = newScrollTop;
-      updateZoomLabel();
-    }
-
-    function ajustarZoom(delta) {
-      applyScale(scale + delta);
-      if (window.mostrarMinimapa) window.mostrarMinimapa();
+      if (window.drawVisor) window.drawVisor();
     }
 
     function isPortrait() {
@@ -1200,7 +1162,7 @@
       const pRect = plano.getBoundingClientRect();
       let fitW, fitH;
       if (isPortrait()) {
-        // SVG está rotado 90°: sus dimensiones efectivas se invierten
+        
         fitW = SVG_H;
         fitH = SVG_W;
       } else {
@@ -1215,7 +1177,6 @@
         : `scale(${scale})`;
       plano.scrollLeft = 0;
       plano.scrollTop = 0;
-      updateZoomLabel();
     }
 
     plano.addEventListener("wheel", function(e) {
@@ -1383,6 +1344,7 @@
 
     function buscar() {
       const id = document.getElementById("inputID").value.trim().toUpperCase();
+      if (!id) return;
       limpiarActivo();
 
       const grupo = document.getElementById(id);
@@ -1398,29 +1360,32 @@
 
       scale = targetScale;
       contenedor.style.transform = `scale(${scale})`;
-      updateZoomLabel();
 
-      setTimeout(() => {
-        const pRect = plano.getBoundingClientRect();
-        plano.scrollTo({
-          left: cx * scale - pRect.width / 2,
-          top: cy * scale - pRect.height / 2,
-          behavior: "smooth"
+      // Doble rAF: el primero aplica el transform, el segundo ya tiene el layout actualizado
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const pRect = plano.getBoundingClientRect();
+          plano.scrollLeft = cx * scale - pRect.width  / 2;
+          plano.scrollTop  = cy * scale - pRect.height / 2;
+          if (window.drawVisor) window.drawVisor();
         });
-      }, 50);
+      });
 
       mostrarInfo(id);
-      // Mostrar minimapa al buscar
+      
       if (window.mostrarMinimapa) window.mostrarMinimapa();
-      // Refrescar minimapa tras el scroll suave
+      
       setTimeout(() => { if (window.renderMinimap) window.renderMinimap(); }, 500);
     }
 
     function limpiarActivo() {
       document.querySelectorAll(".activo").forEach(el => {
-        el.classList.remove("activo");
         if (el._intervalo) { clearInterval(el._intervalo); delete el._intervalo; }
-        el.querySelectorAll("path").forEach(p => { p.style.fill = ""; p.style.stroke = ""; });
+        el.querySelectorAll("path").forEach(p => {
+          p.style.fill = "";
+          p.style.stroke = "";
+        });
+        el.classList.remove("activo");
       });
     }
 
@@ -1464,7 +1429,6 @@
       if (window.ocultarMinimapa) window.ocultarMinimapa();
     }
 
-
     // ── MINIMAPA ──────────────────────────────────────────
     (function() {
       const MM_W = 286, MM_H_BODY = 55; // canvas area height
@@ -1481,7 +1445,7 @@
         if (mmVisible) return;
         mmVisible = true;
         miniEl.style.display = "block";
-        // Force reflow then fade in
+        
         requestAnimationFrame(() => {
           requestAnimationFrame(() => { miniEl.style.opacity = "1"; });
         });
@@ -1497,6 +1461,7 @@
 
       window.mostrarMinimapa = mostrarMinimapa;
       window.ocultarMinimapa = ocultarMinimapa;
+      window.drawVisor = drawVisor;
 
       function toggleMinimapa() {
         mmCollapsed = !mmCollapsed;
@@ -1508,7 +1473,7 @@
       window.renderMinimap = renderMinimap;
 
       function getScaleXY() {
-        // ratio: minimap canvas / real SVG
+        
         const cw = canvas.offsetWidth  || MM_W;
         const ch = canvas.offsetHeight || MM_H_BODY;
         return { rx: cw / SVG_W, ry: ch / SVG_H };
@@ -1521,27 +1486,27 @@
         canvas.width  = cw;
         canvas.height = ch;
 
-        // Fondo blanco igual que la pagina principal
+        
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, cw, ch);
-        // Borde sutil de grilla
+        
         ctx.strokeStyle = "#f0f0f0";
         ctx.lineWidth = 0.3;
 
         const svg = document.querySelector("#contenedorSVG svg");
         if (!svg) { drawVisor(); return; }
 
-        // Escala: de coordenadas SVG (1541 x 544) al canvas del minimapa
+        
         const rx = cw / SVG_W;
         const ry = ch / SVG_H;
 
-        // Recopilar todos los <path> del SVG y dibujar solo su contorno
+        
         const paths = svg.querySelectorAll("path");
 
         ctx.save();
         ctx.scale(rx, ry);
 
-        // Primero, relleno muy sutil para dar sensacion de area
+        
         ctx.fillStyle = "rgba(0, 84, 166, 0.04)";
         paths.forEach(p => {
           try {
@@ -1552,8 +1517,8 @@
           } catch(e) {}
         });
 
-        // Luego, contornos nítidos
-        // Detectar si el path pertenece a elemento activo
+        
+        
         const activoEl = svg.querySelector(".activo");
         paths.forEach(p => {
           try {
@@ -1565,7 +1530,7 @@
               ctx.strokeStyle = "#ff0000";
               ctx.lineWidth = 1.5 / rx;
             } else {
-              // Color segun stroke original del path
+              
               const stroke = p.getAttribute("stroke") || getComputedStyle(p).stroke || "#00e5ff";
               const isRed  = stroke.includes("ff0000") || stroke === "red";
               const isMag  = stroke.includes("ff00ff") || stroke === "magenta";
@@ -1588,26 +1553,26 @@
         if (mmCollapsed) return;
         const { rx, ry } = getScaleXY();
         const pRect = plano.getBoundingClientRect();
-        // Visible area in SVG coords
+        
         const visX = plano.scrollLeft / scale;
         const visY = plano.scrollTop  / scale;
         const visW = pRect.width  / scale;
         const visH = pRect.height / scale;
 
-        // Clamp to SVG bounds
+        
         const vx = Math.max(0, visX) * rx;
         const vy = Math.max(0, visY) * ry;
         const vw = Math.min(visW, SVG_W - Math.max(0,visX)) * rx;
         const vh = Math.min(visH, SVG_H - Math.max(0,visY)) * ry;
 
-        // Position the visor div (it sits on top of canvas, offset by header 18px)
+        
         visor.style.left   = vx + "px";
         visor.style.top    = (20 + vy) + "px";
         visor.style.width  = Math.max(6, vw) + "px";
         visor.style.height = Math.max(6, vh) + "px";
       }
 
-      // Click / drag on minimap → scroll main view
+      
       function mmScrollTo(e) {
         if (mmCollapsed) return;
         const rect = canvas.getBoundingClientRect();
@@ -1632,7 +1597,7 @@
       });
       window.addEventListener("mouseup", function() { mmDragging = false; });
 
-      // Touch support
+      
       canvas.addEventListener("touchstart", function(e) {
         mmScrollTo(e.touches[0]);
         e.preventDefault();
@@ -1642,54 +1607,40 @@
         e.preventDefault();
       }, { passive: false });
 
-      // Refresh visor on scroll/zoom
+      
       plano.addEventListener("scroll", drawVisor, { passive: true });
 
-      // Patch applyScale to refresh visor
-      const _origApply = applyScale;
-      window.applyScale = function(ns, px, py) {
-        _origApply(ns, px, py);
-        drawVisor();
-      };
-
-      // Initial render after load + on resize
+      
       window.addEventListener("load", () => {
+        
+        const svg = document.querySelector("#contenedorSVG svg");
+        if (svg) {
+          svg.querySelectorAll("text[id]").forEach(texto => {
+            let simbolo = texto.previousElementSibling;
+            while (simbolo && simbolo.tagName !== "path") simbolo = simbolo.previousElementSibling;
+            if (simbolo) {
+              const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+              g.setAttribute("id", texto.id);
+              simbolo.parentNode.insertBefore(g, simbolo);
+              g.appendChild(simbolo);
+              g.appendChild(texto);
+            }
+          });
+        }
+        fitToScreen();
         setTimeout(() => { renderMinimap(); }, 400);
-      });
+      });      
       window.addEventListener("resize", () => {
+        fitToScreen();
         if (!mmCollapsed) renderMinimap();
       });
-
-      // Periodic refresh for visor position (lightweight, only redraws visor rect)
+      
       setInterval(() => { if (mmVisible && !mmCollapsed) drawVisor(); }, 200);
-      // Full re-render occasionally (catches active element changes)
+      
       setInterval(() => { if (mmVisible && !mmCollapsed) renderMinimap(); }, 4000);
     })();
     // ─────────────────────────────────────────────────────
 
-    // Recalcular fit al rotar el dispositivo
-    window.addEventListener("resize", () => {
-      fitToScreen();
-    });
-
-    window.addEventListener("load", () => {
-      const svg = document.querySelector("#contenedorSVG svg");
-      if (!svg) return;
-
-      svg.querySelectorAll("text[id]").forEach(texto => {
-        let simbolo = texto.previousElementSibling;
-        while (simbolo && simbolo.tagName !== "path") simbolo = simbolo.previousElementSibling;
-        if (simbolo) {
-          const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-          g.setAttribute("id", texto.id);
-          simbolo.parentNode.insertBefore(g, simbolo);
-          g.appendChild(simbolo);
-          g.appendChild(texto);
-        }
-      });
-
-      fitToScreen();
-    });
   </script>
 
   <nav class="bottom-nav">
@@ -1698,18 +1649,6 @@
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/>
       </svg>
       Inicio
-    </div>
-    <div class="nav-item" onclick="location.href='../hmi/index.html'">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-      </svg>
-      HMI
-    </div>
-    <div class="nav-item" onclick="location.href='../checklist/index.html'">
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-      </svg>
-      Checklist
     </div>
     <div class="nav-item active">
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
