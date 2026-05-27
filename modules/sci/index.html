@@ -13,7 +13,7 @@
       background: #f0f0f0;
       display: flex;
       flex-direction: column;
-      height: calc(100vh - 64px - env(safe-area-inset-bottom, 0px));
+      height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0px));
       overflow: hidden;
     }
 
@@ -71,9 +71,7 @@
       flex: 1;
       overflow: auto;
       background: #e8e8e8;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      display: block;
       cursor: grab;
       user-select: none;
       position: relative;
@@ -82,7 +80,7 @@
 
     #contenedorSVG {
       transform-origin: 0 0;
-      display: inline-block;
+      display: block;
       flex-shrink: 0;
     }
 
@@ -1156,21 +1154,27 @@
       const pRect = plano.getBoundingClientRect();
       let fitW, fitH;
       if (isPortrait()) {
-        
         fitW = SVG_H;
         fitH = SVG_W;
       } else {
         fitW = SVG_W;
         fitH = SVG_H;
       }
-      const scaleX = pRect.width / fitW;
+      const scaleX = pRect.width  / fitW;
       const scaleY = pRect.height / fitH;
       scale = Math.min(scaleX, scaleY) * 0.96;
+
       contenedor.style.transform = isPortrait()
         ? `rotate(90deg) translateY(-100%) scale(${scale})`
         : `scale(${scale})`;
-      plano.scrollLeft = 0;
-      plano.scrollTop = 0;
+
+      // Centrar horizontalmente si el SVG es más angosto que el viewport
+      requestAnimationFrame(() => {
+        const svgW = isPortrait() ? SVG_H * scale : SVG_W * scale;
+        const svgH = isPortrait() ? SVG_W * scale : SVG_H * scale;
+        plano.scrollLeft = Math.max(0, (svgW - pRect.width)  / 2);
+        plano.scrollTop  = Math.max(0, (svgH - pRect.height) / 2);
+      });
     }
 
     plano.addEventListener("wheel", function(e) {
@@ -1349,18 +1353,25 @@
 
       const targetScale = 6;
       const bbox = grupo.getBBox();
-      const cx = bbox.x + bbox.width / 2;
+      const cx = bbox.x + bbox.width  / 2;
       const cy = bbox.y + bbox.height / 2;
 
       scale = targetScale;
-      contenedor.style.transform = `scale(${scale})`;
+      contenedor.style.transform = isPortrait()
+        ? `rotate(90deg) translateY(-100%) scale(${scale})`
+        : `scale(${scale})`;
 
-      // Doble rAF: el primero aplica el transform, el segundo ya tiene el layout actualizado
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const pRect = plano.getBoundingClientRect();
-          plano.scrollLeft = cx * scale - pRect.width  / 2;
-          plano.scrollTop  = cy * scale - pRect.height / 2;
+          // En portrait el SVG está rotado: x del SVG → y visual, y del SVG → ancho visual invertido
+          if (isPortrait()) {
+            plano.scrollLeft = cy * scale - pRect.width  / 2;
+            plano.scrollTop  = (SVG_W - cx) * scale - pRect.height / 2;
+          } else {
+            plano.scrollLeft = cx * scale - pRect.width  / 2;
+            plano.scrollTop  = cy * scale - pRect.height / 2;
+          }
           if (window.drawVisor) window.drawVisor();
         });
       });
