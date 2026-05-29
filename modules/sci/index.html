@@ -1125,47 +1125,28 @@
     // En portrait: rota 90deg y ajusta el espacio del contenedor para que el scroll funcione.
     // Estrategia: transformOrigin "top left", luego rotate(90deg) desplaza el contenido
     // fuera de pantalla hacia arriba, se corrige con translate(0, -anchoVisual).
-    // offsetX/offsetY: margen de centrado que se agrega al transform en portrait
-    let _centerOffsetX = 0;
-    let _centerOffsetY = 0;
-
     function applyTransform() {
       const svgEl = contenedor.querySelector("svg");
       if (isPortrait()) {
-        const scaledW = SVG_W * scale;  // ancho fisico del SVG escalado
-        const scaledH = SVG_H * scale;  // alto fisico del SVG escalado
-        // Despues de rotar 90deg con origin 0,0:
-        //   - el ancho visual resultante = scaledH
-        //   - el alto  visual resultante = scaledW
-        // Para centrar horizontalmente: offsetX = (pRect.width - scaledH) / 2
-        // Para centrar verticalmente:   offsetY = (pRect.height - scaledW) / 2
-        const pRect = plano.getBoundingClientRect();
-        _centerOffsetX = Math.max(0, (pRect.width  - scaledH) / 2);
-        _centerOffsetY = Math.max(0, (pRect.height - scaledW) / 2);
-
-        if (svgEl) svgEl.style.width = Math.round(scaledW) + "px";
-        contenedor.style.transformOrigin = "0 0";
-        // rotate(90deg) desde 0,0: el SVG queda a la derecha y arriba.
-        // translate(offsetX, offsetY - scaledW) lo mueve al centro:
-        //   offsetX: desplazamiento horizontal para centrar
-        //   offsetY - scaledW: correccion vertical (rotate lleva el contenido scaledW px hacia arriba)
-        contenedor.style.transform =
-          `rotate(90deg) translate(${_centerOffsetY}px, ${_centerOffsetX - scaledW}px) scale(${scale})`;
-
-        // El contenedor necesita dimensiones para que #plano calcule su scrollable area
-        contenedor.style.width  = Math.round(scaledH) + "px";
-        contenedor.style.height = Math.round(scaledW) + "px";
-      } else {
-        const pRect = plano.getBoundingClientRect();
+        // Escalar el SVG directamente via width (no scale en transform)
         const scaledW = SVG_W * scale;
         const scaledH = SVG_H * scale;
-        _centerOffsetX = Math.max(0, (pRect.width  - scaledW) / 2);
-        _centerOffsetY = Math.max(0, (pRect.height - scaledH) / 2);
+        if (svgEl) svgEl.style.width = scaledW + "px";
 
+        // Rotar 90deg con origin centro del SVG escalado para que quede centrado
+        // El centro del SVG fisico es (scaledW/2, scaledH/2)
+        const cx = scaledW / 2;
+        const cy = scaledH / 2;
+        contenedor.style.transformOrigin = cx + "px " + cy + "px";
+        contenedor.style.transform = "rotate(90deg)";
+
+        // Dar espacio suficiente al contenedor para el scroll
+        contenedor.style.width  = scaledW + "px";
+        contenedor.style.height = scaledH + "px";
+      } else {
         if (svgEl) svgEl.style.width = SVG_W + "px";
         contenedor.style.transformOrigin = "0 0";
-        contenedor.style.transform =
-          `translate(${_centerOffsetX}px, ${_centerOffsetY}px) scale(${scale})`;
+        contenedor.style.transform = "scale(" + scale + ")";
         contenedor.style.width  = "";
         contenedor.style.height = "";
       }
@@ -1174,16 +1155,12 @@
     function applyScale(newScale, pivotX, pivotY) {
       const oldScale = scale;
       scale = Math.max(0.1, Math.min(newScale, 12));
-
       const ratio = scale / oldScale;
       const pRect = plano.getBoundingClientRect();
-
       const px = (pivotX !== undefined) ? pivotX : pRect.width / 2;
       const py = (pivotY !== undefined) ? pivotY : pRect.height / 2;
-
       const newScrollLeft = (plano.scrollLeft + px) * ratio - px;
       const newScrollTop  = (plano.scrollTop  + py) * ratio - py;
-
       applyTransform();
       plano.scrollLeft = newScrollLeft;
       plano.scrollTop  = newScrollTop;
@@ -1192,9 +1169,8 @@
 
     function fitToScreen() {
       const pRect = plano.getBoundingClientRect();
-
       if (isPortrait()) {
-        // SVG rotado: ancho visual = SVG_H * scale, alto visual = SVG_W * scale
+        // En portrait el SVG rotado 90deg: su alto (SVG_H) se vuelve el ancho visual
         const scaleX = pRect.width  / SVG_H;
         const scaleY = pRect.height / SVG_W;
         scale = Math.min(scaleX, scaleY) * 0.96;
@@ -1203,11 +1179,24 @@
         const scaleY = pRect.height / SVG_H;
         scale = Math.min(scaleX, scaleY) * 0.96;
       }
-
       applyTransform();
-      // El centrado esta integrado en applyTransform via translate, no via scroll
-      plano.scrollLeft = 0;
-      plano.scrollTop  = 0;
+      // Centrar via scroll: el contenedor es mas grande que el viewport
+      requestAnimationFrame(() => {
+        if (isPortrait()) {
+          const scaledW = SVG_W * scale;
+          const scaledH = SVG_H * scale;
+          // Tras rotar con origin=centro: el contenedor sigue siendo scaledW x scaledH px
+          // pero visualmente el SVG ocupa scaledH de ancho y scaledW de alto
+          // Centrar: scroll al punto donde el SVG rotado quede en medio
+          plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
+          plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
+        } else {
+          const scaledW = SVG_W * scale;
+          const scaledH = SVG_H * scale;
+          plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
+          plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
+        }
+      });
     }
 
     plano.addEventListener("wheel", function(e) {
@@ -1395,14 +1384,18 @@
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const pRect = plano.getBoundingClientRect();
-          // Al buscar, el centrado ya esta en el transform (no en scroll),
-          // por eso se descuenta el offset para llegar exactamente al elemento
           if (isPortrait()) {
-            plano.scrollLeft = cy * scale + _centerOffsetX - pRect.width  / 2;
-            plano.scrollTop  = cx * scale + _centerOffsetY - pRect.height / 2;
+            // SVG rotado desde su centro: eje X SVG -> eje Y visual, eje Y SVG -> eje X visual
+            // El contenedor mide scaledW x scaledH pero el SVG visualmente es scaledH x scaledW
+            // scrollLeft apunta al cy del SVG (eje horizontal visual = eje Y SVG fisico)
+            // scrollTop  apunta al cx del SVG (eje vertical visual  = eje X SVG fisico)
+            const scaledW = SVG_W * scale;
+            const scaledH = SVG_H * scale;
+            plano.scrollLeft = (scaledW/2 - scaledH/2) + cy * scale - pRect.width  / 2;
+            plano.scrollTop  = (scaledH/2 - scaledW/2) + cx * scale - pRect.height / 2;
           } else {
-            plano.scrollLeft = cx * scale + _centerOffsetX - pRect.width  / 2;
-            plano.scrollTop  = cy * scale + _centerOffsetY - pRect.height / 2;
+            plano.scrollLeft = cx * scale - pRect.width  / 2;
+            plano.scrollTop  = cy * scale - pRect.height / 2;
           }
           if (window.drawVisor) window.drawVisor();
         });
