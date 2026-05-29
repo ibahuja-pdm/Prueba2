@@ -199,7 +199,7 @@
     
 
     
-    @media (max-width: 600px) and (orientation: portrait) {
+    @media (max-width: 600px) {
       header h2 { font-size: 13px; }
       header { padding: 8px 12px; gap: 10px; }
       header img { height: 28px; }
@@ -207,28 +207,27 @@
       .toolbar {
         padding: 6px 10px;
         gap: 6px;
-        justify-content: space-between;
+        justify-content: center;
       }
-      .toolbar input { width: 120px; font-size: 13px; }
+      .toolbar input { width: 130px; font-size: 13px; }
       .toolbar button { font-size: 13px; padding: 6px 10px; }
 
-      
       #plano {
         overflow: auto;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-x pan-y pinch-zoom;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
-      
-      #minimapa {
-        left: auto;
-        right: 16px;
-        bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
-        width: 180px;
-        height: 120px;
+      #contenedorSVG {
+        margin: auto;
       }
 
-      
+      /* Minimapa oculto en movil */
+      #minimapa { display: none !important; }
+
       #info { display: none !important; }
     }
   </style>
@@ -1127,7 +1126,7 @@
 
     function applyScale(newScale, pivotX, pivotY) {
       const oldScale = scale;
-      scale = Math.max(0.5, Math.min(newScale, 10));
+      scale = Math.max(0.1, Math.min(newScale, 12));
 
       const ratio = scale / oldScale;
       const pRect = plano.getBoundingClientRect();
@@ -1138,40 +1137,28 @@
       const newScrollLeft = (plano.scrollLeft + px) * ratio - px;
       const newScrollTop = (plano.scrollTop + py) * ratio - py;
 
-      contenedor.style.transform = isPortrait()
-        ? `rotate(90deg) translateY(-100%) scale(${scale})`
-        : `scale(${scale})`;
+      contenedor.style.transform = `scale(${scale})`;
       plano.scrollLeft = newScrollLeft;
       plano.scrollTop = newScrollTop;
       if (window.drawVisor) window.drawVisor();
     }
 
     function isPortrait() {
-      return window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches;
+      return false; // Sin rotacion en movil
     }
 
     function fitToScreen() {
       const pRect = plano.getBoundingClientRect();
-      let fitW, fitH;
-      if (isPortrait()) {
-        fitW = SVG_H;
-        fitH = SVG_W;
-      } else {
-        fitW = SVG_W;
-        fitH = SVG_H;
-      }
-      const scaleX = pRect.width  / fitW;
-      const scaleY = pRect.height / fitH;
+      const scaleX = pRect.width  / SVG_W;
+      const scaleY = pRect.height / SVG_H;
       scale = Math.min(scaleX, scaleY) * 0.96;
 
-      contenedor.style.transform = isPortrait()
-        ? `rotate(90deg) translateY(-100%) scale(${scale})`
-        : `scale(${scale})`;
+      contenedor.style.transform = `scale(${scale})`;
 
-      // Centrar horizontalmente si el SVG es más angosto que el viewport
+      // Centrar el SVG en el viewport
       requestAnimationFrame(() => {
-        const svgW = isPortrait() ? SVG_H * scale : SVG_W * scale;
-        const svgH = isPortrait() ? SVG_W * scale : SVG_H * scale;
+        const svgW = SVG_W * scale;
+        const svgH = SVG_H * scale;
         plano.scrollLeft = Math.max(0, (svgW - pRect.width)  / 2);
         plano.scrollTop  = Math.max(0, (svgH - pRect.height) / 2);
       });
@@ -1357,21 +1344,13 @@
       const cy = bbox.y + bbox.height / 2;
 
       scale = targetScale;
-      contenedor.style.transform = isPortrait()
-        ? `rotate(90deg) translateY(-100%) scale(${scale})`
-        : `scale(${scale})`;
+      contenedor.style.transform = `scale(${scale})`;
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const pRect = plano.getBoundingClientRect();
-          // En portrait el SVG está rotado: x del SVG → y visual, y del SVG → ancho visual invertido
-          if (isPortrait()) {
-            plano.scrollLeft = cy * scale - pRect.width  / 2;
-            plano.scrollTop  = (SVG_W - cx) * scale - pRect.height / 2;
-          } else {
-            plano.scrollLeft = cx * scale - pRect.width  / 2;
-            plano.scrollTop  = cy * scale - pRect.height / 2;
-          }
+          plano.scrollLeft = cx * scale - pRect.width  / 2;
+          plano.scrollTop  = cy * scale - pRect.height / 2;
           if (window.drawVisor) window.drawVisor();
         });
       });
@@ -1386,11 +1365,14 @@
     function limpiarActivo() {
       document.querySelectorAll(".activo").forEach(el => {
         if (el._intervalo) { clearInterval(el._intervalo); delete el._intervalo; }
-        el.querySelectorAll("path").forEach(p => {
-          p.style.fill = "";
-          p.style.stroke = "";
-        });
         el.classList.remove("activo");
+        // Limpiar estilos en el siguiente frame para evitar condición de carrera con el intervalo
+        requestAnimationFrame(() => {
+          el.querySelectorAll("path").forEach(p => {
+            p.style.fill = "";
+            p.style.stroke = "";
+          });
+        });
       });
     }
 
@@ -1621,12 +1603,18 @@
         
         const svg = document.querySelector("#contenedorSVG svg");
         if (svg) {
+          const seenIds = new Set();
           svg.querySelectorAll("text[id]").forEach(texto => {
+            const tid = texto.id;
+            // Ignorar IDs duplicados (ej: dos ESTACIONAMIENTO)
+            if (seenIds.has(tid)) { texto.removeAttribute("id"); return; }
+            seenIds.add(tid);
             let simbolo = texto.previousElementSibling;
             while (simbolo && simbolo.tagName !== "path") simbolo = simbolo.previousElementSibling;
             if (simbolo) {
               const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-              g.setAttribute("id", texto.id);
+              g.setAttribute("id", tid);
+              texto.removeAttribute("id"); // Evitar IDs duplicados en el DOM
               simbolo.parentNode.insertBefore(g, simbolo);
               g.appendChild(simbolo);
               g.appendChild(texto);
