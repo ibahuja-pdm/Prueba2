@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SCI — Sistema Contra Incendio</title>
   <link rel="stylesheet" href="../../css/global.css">
   <style>
@@ -13,7 +13,7 @@
       background: #f0f0f0;
       display: flex;
       flex-direction: column;
-      height: calc(100dvh - 64px - env(safe-area-inset-bottom, 0px));
+      height: calc(100dvh - var(--nav-h) - var(--safe-bottom));
       overflow: hidden;
     }
 
@@ -82,6 +82,9 @@
       transform-origin: 0 0;
       display: block;
       flex-shrink: 0;
+      /* Centrado horizontal cuando el contenido cabe en pantalla */
+      min-width: 100%;
+      box-sizing: content-box;
     }
 
     #contenedorSVG svg {
@@ -132,7 +135,7 @@
     
     #minimapa {
       position: fixed;
-      bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 16px);
+      bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px);
       left: 16px;
       width: 350px;       /* 1541 * 0.1 * (286/154) ≈ exact aspect */
       height: 200px;       /* 20px header + 55px canvas (544*0.1=54.4) */
@@ -1161,6 +1164,9 @@
       const py = (pivotY !== undefined) ? pivotY : pRect.height / 2;
       const newScrollLeft = (plano.scrollLeft + px) * ratio - px;
       const newScrollTop  = (plano.scrollTop  + py) * ratio - py;
+      // Reset centering margin on manual zoom
+      contenedor.style.marginLeft = "";
+      contenedor.style.marginTop  = "";
       applyTransform();
       plano.scrollLeft = newScrollLeft;
       plano.scrollTop  = newScrollTop;
@@ -1180,19 +1186,24 @@
         scale = Math.min(scaleX, scaleY) * 0.96;
       }
       applyTransform();
-      // Centrar via scroll: el contenedor es mas grande que el viewport
+      // Centrar via padding cuando el contenido cabe; via scroll cuando es mas grande
       requestAnimationFrame(() => {
         if (isPortrait()) {
           const scaledW = SVG_W * scale;
           const scaledH = SVG_H * scale;
-          // Tras rotar con origin=centro: el contenedor sigue siendo scaledW x scaledH px
-          // pero visualmente el SVG ocupa scaledH de ancho y scaledW de alto
-          // Centrar: scroll al punto donde el SVG rotado quede en medio
+          const padH = Math.max(0, (pRect.width  - scaledH) / 2);
+          const padV = Math.max(0, (pRect.height - scaledW) / 2);
+          contenedor.style.marginLeft = padH + "px";
+          contenedor.style.marginTop  = padV + "px";
           plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
           plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
         } else {
           const scaledW = SVG_W * scale;
           const scaledH = SVG_H * scale;
+          const padH = Math.max(0, (pRect.width  - scaledW) / 2);
+          const padV = Math.max(0, (pRect.height - scaledH) / 2);
+          contenedor.style.marginLeft = padH + "px";
+          contenedor.style.marginTop  = padV + "px";
           plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
           plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
         }
