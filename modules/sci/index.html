@@ -13,7 +13,7 @@
       background: #f0f0f0;
       display: flex;
       flex-direction: column;
-      height: calc(100dvh - var(--nav-h) - var(--safe-bottom));
+      height: 100dvh;
       overflow: hidden;
     }
 
@@ -69,12 +69,15 @@
 
     #plano {
       flex: 1;
+      min-height: 0;
       overflow: auto;
       background: #e8e8e8;
       display: block;
       cursor: grab;
       user-select: none;
       position: relative;
+      /* Espacio para la bottom-nav fija */
+      padding-bottom: calc(var(--nav-h, 56px) + var(--safe-bottom, 0px));
     }
     #plano.panning { cursor: grabbing; }
 
@@ -1175,37 +1178,36 @@
 
     function fitToScreen() {
       const pRect = plano.getBoundingClientRect();
+      // Altura visual real: excluir padding-bottom de la bottom-nav
+      const navH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 56;
+      const safeB = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
+      const availH = pRect.height - navH - safeB;
+      const availW = pRect.width;
       if (isPortrait()) {
-        // En portrait el SVG rotado 90deg: su alto (SVG_H) se vuelve el ancho visual
-        const scaleX = pRect.width  / SVG_H;
-        const scaleY = pRect.height / SVG_W;
+        const scaleX = availW / SVG_H;
+        const scaleY = availH / SVG_W;
         scale = Math.min(scaleX, scaleY) * 0.96;
       } else {
-        const scaleX = pRect.width  / SVG_W;
-        const scaleY = pRect.height / SVG_H;
+        const scaleX = availW / SVG_W;
+        const scaleY = availH / SVG_H;
         scale = Math.min(scaleX, scaleY) * 0.96;
       }
       applyTransform();
-      // Centrar via padding cuando el contenido cabe; via scroll cuando es mas grande
       requestAnimationFrame(() => {
         if (isPortrait()) {
           const scaledW = SVG_W * scale;
           const scaledH = SVG_H * scale;
-          const padH = Math.max(0, (pRect.width  - scaledH) / 2);
-          const padV = Math.max(0, (pRect.height - scaledW) / 2);
-          contenedor.style.marginLeft = padH + "px";
-          contenedor.style.marginTop  = padV + "px";
-          plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
-          plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
+          contenedor.style.marginLeft = Math.max(0, (availW - scaledH) / 2) + "px";
+          contenedor.style.marginTop  = Math.max(0, (availH - scaledW) / 2) + "px";
+          plano.scrollLeft = Math.max(0, (scaledW - availW) / 2);
+          plano.scrollTop  = Math.max(0, (scaledH - availH) / 2);
         } else {
           const scaledW = SVG_W * scale;
           const scaledH = SVG_H * scale;
-          const padH = Math.max(0, (pRect.width  - scaledW) / 2);
-          const padV = Math.max(0, (pRect.height - scaledH) / 2);
-          contenedor.style.marginLeft = padH + "px";
-          contenedor.style.marginTop  = padV + "px";
-          plano.scrollLeft = Math.max(0, (scaledW - pRect.width)  / 2);
-          plano.scrollTop  = Math.max(0, (scaledH - pRect.height) / 2);
+          contenedor.style.marginLeft = Math.max(0, (availW - scaledW) / 2) + "px";
+          contenedor.style.marginTop  = Math.max(0, (availH - scaledH) / 2) + "px";
+          plano.scrollLeft = Math.max(0, (scaledW - availW) / 2);
+          plano.scrollTop  = Math.max(0, (scaledH - availH) / 2);
         }
       });
     }
