@@ -1316,7 +1316,8 @@
     };
 
     function buscar() {
-      const id = document.getElementById("inputID").value.trim().toUpperCase();
+      const inputEl = document.getElementById("inputID");
+      const id = inputEl.value.trim().toUpperCase();
       if (!id) return;
       limpiarActivo();
 
@@ -1334,14 +1335,39 @@
       scale = targetScale;
       applyTransform();
 
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          const pRect = plano.getBoundingClientRect();
-          plano.scrollLeft = cx * scale - pRect.width  / 2;
-          plano.scrollTop  = cy * scale - pRect.height / 2;
-          if (window.drawVisor) window.drawVisor();
-        });
-      });
+      function centrarEnID() {
+        const pRect = plano.getBoundingClientRect();
+        plano.scrollLeft = cx * scale - pRect.width  / 2;
+        plano.scrollTop  = cy * scale - pRect.height / 2;
+        if (window.drawVisor) window.drawVisor();
+      }
+
+      // Cerrar el teclado antes de medir: si sigue abierto, el tamaño de
+      // #plano que se lee es el incorrecto y el centrado queda descuadrado.
+      inputEl.blur();
+
+      if (window.visualViewport) {
+        // Esperar a que el viewport termine de ajustarse (teclado cerrandose)
+        // antes de calcular el centrado final. Fallback por si no hay cambio.
+        let ajustado = false;
+        const onVVResize = () => {
+          if (ajustado) return;
+          ajustado = true;
+          window.visualViewport.removeEventListener("resize", onVVResize);
+          requestAnimationFrame(centrarEnID);
+        };
+        window.visualViewport.addEventListener("resize", onVVResize);
+        requestAnimationFrame(() => requestAnimationFrame(centrarEnID));
+        setTimeout(() => {
+          if (!ajustado) {
+            ajustado = true;
+            window.visualViewport.removeEventListener("resize", onVVResize);
+          }
+          centrarEnID();
+        }, 350);
+      } else {
+        requestAnimationFrame(() => requestAnimationFrame(centrarEnID));
+      }
 
       mostrarInfo(id);
       
@@ -1690,6 +1716,22 @@
         location.href = '../../index.html';
       }
     });
+
+    // En móvil, cuando aparece el teclado virtual, la barra de navegación
+    // fija (bottom:0 respecto al viewport de layout) queda oculta detrás
+    // del teclado porque el viewport visual se encoge pero el layout no.
+    // La subimos con translateY según el espacio que ocupa el teclado.
+    (function mantenerNavSobreTeclado() {
+      const nav = document.querySelector('.bottom-nav');
+      if (!nav || !window.visualViewport) return;
+      function ajustar() {
+        const vv = window.visualViewport;
+        const espacioTeclado = window.innerHeight - vv.height - vv.offsetTop;
+        nav.style.transform = espacioTeclado > 1 ? `translateY(-${espacioTeclado}px)` : '';
+      }
+      window.visualViewport.addEventListener('resize', ajustar);
+      window.visualViewport.addEventListener('scroll', ajustar);
+    })();
   </script>
   <!-- Service Worker -->
   <script src="../../js/sw-register.js"></script>
