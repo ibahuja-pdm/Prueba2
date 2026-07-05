@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SCI — Sistema Contra Incendio</title>
   <link rel="stylesheet" href="../../css/global.css">
   <style>
@@ -202,33 +202,6 @@
     #minimapa.collapsed canvas,
     #minimapa.collapsed #minimapa-visor { display: none; }
 
-    
-
-    
-    @media (max-width: 600px) {
-      header h2 { font-size: 13px; }
-      header { padding: 8px 12px; gap: 10px; }
-      header img { height: 28px; }
-
-      .toolbar {
-        padding: 6px 10px;
-        gap: 6px;
-        justify-content: center;
-      }
-      .toolbar input { width: 130px; font-size: 13px; }
-      .toolbar button { font-size: 13px; padding: 6px 10px; }
-
-      #plano {
-        overflow: scroll;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-x pan-y pinch-zoom;
-      }
-
-      /* Minimapa oculto en movil */
-      #minimapa { display: none !important; }
-
-      #info { display: none !important; }
-    }
   </style>
 </head>
 <body>
@@ -1123,39 +1096,14 @@
     const plano = document.getElementById("plano");
     const contenedor = document.getElementById("contenedorSVG");
 
-    function isPortrait() {
-      return window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches;
-    }
-
-    // Aplica escala y rotacion al contenedor SVG.
-    // En portrait: rota 90deg y ajusta el espacio del contenedor para que el scroll funcione.
-    // Estrategia: transformOrigin "top left", luego rotate(90deg) desplaza el contenido
-    // fuera de pantalla hacia arriba, se corrige con translate(0, -anchoVisual).
+    // Aplica la escala al contenedor SVG.
     function applyTransform() {
       const svgEl = contenedor.querySelector("svg");
-      if (isPortrait()) {
-        // Escalar el SVG directamente via width (no scale en transform)
-        const scaledW = SVG_W * scale;
-        const scaledH = SVG_H * scale;
-        if (svgEl) svgEl.style.width = scaledW + "px";
-
-        // Rotar 90deg con origin centro del SVG escalado para que quede centrado
-        // El centro del SVG fisico es (scaledW/2, scaledH/2)
-        const cx = scaledW / 2;
-        const cy = scaledH / 2;
-        contenedor.style.transformOrigin = cx + "px " + cy + "px";
-        contenedor.style.transform = "rotate(90deg)";
-
-        // Dar espacio suficiente al contenedor para el scroll
-        contenedor.style.width  = scaledW + "px";
-        contenedor.style.height = scaledH + "px";
-      } else {
-        if (svgEl) svgEl.style.width = SVG_W + "px";
-        contenedor.style.transformOrigin = "0 0";
-        contenedor.style.transform = "scale(" + scale + ")";
-        contenedor.style.width  = "";
-        contenedor.style.height = "";
-      }
+      if (svgEl) svgEl.style.width = SVG_W + "px";
+      contenedor.style.transformOrigin = "0 0";
+      contenedor.style.transform = "scale(" + scale + ")";
+      contenedor.style.width  = "";
+      contenedor.style.height = "";
     }
 
     function applyScale(newScale, pivotX, pivotY) {
@@ -1183,32 +1131,17 @@
       const safeB = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom')) || 0;
       const availH = pRect.height - navH - safeB;
       const availW = pRect.width;
-      if (isPortrait()) {
-        const scaleX = availW / SVG_H;
-        const scaleY = availH / SVG_W;
-        scale = Math.min(scaleX, scaleY) * 0.96;
-      } else {
-        const scaleX = availW / SVG_W;
-        const scaleY = availH / SVG_H;
-        scale = Math.min(scaleX, scaleY) * 0.96;
-      }
+      const scaleX = availW / SVG_W;
+      const scaleY = availH / SVG_H;
+      scale = Math.min(scaleX, scaleY) * 0.96;
       applyTransform();
       requestAnimationFrame(() => {
-        if (isPortrait()) {
-          const scaledW = SVG_W * scale;
-          const scaledH = SVG_H * scale;
-          contenedor.style.marginLeft = Math.max(0, (availW - scaledH) / 2) + "px";
-          contenedor.style.marginTop  = Math.max(0, (availH - scaledW) / 2) + "px";
-          plano.scrollLeft = Math.max(0, (scaledW - availW) / 2);
-          plano.scrollTop  = Math.max(0, (scaledH - availH) / 2);
-        } else {
-          const scaledW = SVG_W * scale;
-          const scaledH = SVG_H * scale;
-          contenedor.style.marginLeft = Math.max(0, (availW - scaledW) / 2) + "px";
-          contenedor.style.marginTop  = Math.max(0, (availH - scaledH) / 2) + "px";
-          plano.scrollLeft = Math.max(0, (scaledW - availW) / 2);
-          plano.scrollTop  = Math.max(0, (scaledH - availH) / 2);
-        }
+        const scaledW = SVG_W * scale;
+        const scaledH = SVG_H * scale;
+        contenedor.style.marginLeft = Math.max(0, (availW - scaledW) / 2) + "px";
+        contenedor.style.marginTop  = Math.max(0, (availH - scaledH) / 2) + "px";
+        plano.scrollLeft = Math.max(0, (scaledW - availW) / 2);
+        plano.scrollTop  = Math.max(0, (scaledH - availH) / 2);
       });
     }
 
@@ -1397,19 +1330,8 @@
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           const pRect = plano.getBoundingClientRect();
-          if (isPortrait()) {
-            // SVG rotado desde su centro: eje X SVG -> eje Y visual, eje Y SVG -> eje X visual
-            // El contenedor mide scaledW x scaledH pero el SVG visualmente es scaledH x scaledW
-            // scrollLeft apunta al cy del SVG (eje horizontal visual = eje Y SVG fisico)
-            // scrollTop  apunta al cx del SVG (eje vertical visual  = eje X SVG fisico)
-            const scaledW = SVG_W * scale;
-            const scaledH = SVG_H * scale;
-            plano.scrollLeft = (scaledW/2 - scaledH/2) + cy * scale - pRect.width  / 2;
-            plano.scrollTop  = (scaledH/2 - scaledW/2) + cx * scale - pRect.height / 2;
-          } else {
-            plano.scrollLeft = cx * scale - pRect.width  / 2;
-            plano.scrollTop  = cy * scale - pRect.height / 2;
-          }
+          plano.scrollLeft = cx * scale - pRect.width  / 2;
+          plano.scrollTop  = cy * scale - pRect.height / 2;
           if (window.drawVisor) window.drawVisor();
         });
       });
@@ -1448,7 +1370,6 @@
     }
 
     function mostrarInfo(id) {
-      if (window.matchMedia("(max-width: 600px)").matches) return;
       const data = detectores[id];
       document.getElementById("infoID").textContent = id;
       document.getElementById("infoTipo").textContent = data ? data.tipo : "Detector";
@@ -1692,44 +1613,6 @@
       
       setInterval(() => { if (mmVisible && !mmCollapsed) renderMinimap(); }, 4000);
     })();
-    // ─────────────────────────────────────────────────────
-
-    // ── Pinch-to-zoom táctil ──────────────────────────────
-    let pinchDist0 = null;
-    let pinchScale0 = null;
-    let pinchMidX = 0, pinchMidY = 0;
-
-    plano.addEventListener("touchstart", function(e) {
-      if (e.touches.length === 2) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        pinchDist0  = Math.hypot(dx, dy);
-        pinchScale0 = scale;
-        const rect = plano.getBoundingClientRect();
-        pinchMidX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
-        pinchMidY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    plano.addEventListener("touchmove", function(e) {
-      if (e.touches.length === 2 && pinchDist0 !== null) {
-        const dx = e.touches[0].clientX - e.touches[1].clientX;
-        const dy = e.touches[0].clientY - e.touches[1].clientY;
-        const dist = Math.hypot(dx, dy);
-        const newScale = Math.min(Math.max(pinchScale0 * (dist / pinchDist0), 0.1), 12);
-        applyScale(newScale, pinchMidX, pinchMidY);
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    plano.addEventListener("touchend", function(e) {
-      if (e.touches.length < 2) {
-        pinchDist0 = null;
-        pinchScale0 = null;
-        if (window.mostrarMinimapa) window.mostrarMinimapa();
-      }
-    });
     // ─────────────────────────────────────────────────────
 
   </script>
