@@ -202,6 +202,11 @@
     #minimapa.collapsed canvas,
     #minimapa.collapsed #minimapa-visor { display: none; }
 
+    @media (max-width: 600px) {
+      #minimapa { display: none !important; }
+      #info { display: none !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -1370,6 +1375,7 @@
     }
 
     function mostrarInfo(id) {
+      if (window.matchMedia("(max-width: 600px)").matches) return;
       const data = detectores[id];
       document.getElementById("infoID").textContent = id;
       document.getElementById("infoTipo").textContent = data ? data.tipo : "Detector";
@@ -1410,7 +1416,7 @@
       let mmVisible = false;
 
       function mostrarMinimapa() {
-        if (mmVisible) return;
+        if (mmVisible || window.matchMedia("(max-width: 600px)").matches) return;
         mmVisible = true;
         miniEl.style.display = "block";
         
