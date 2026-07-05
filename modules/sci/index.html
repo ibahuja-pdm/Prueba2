@@ -76,6 +76,8 @@
       cursor: grab;
       user-select: none;
       position: relative;
+      touch-action: pan-x pan-y;
+      -webkit-overflow-scrolling: touch;
       /* Espacio para la bottom-nav fija */
       padding-bottom: calc(var(--nav-h, 56px) + var(--safe-bottom, 0px));
     }
@@ -1619,6 +1621,43 @@
       
       setInterval(() => { if (mmVisible && !mmCollapsed) renderMinimap(); }, 4000);
     })();
+    // ─────────────────────────────────────────────────────
+
+    // ── Pinch-to-zoom táctil (dos dedos) ──────────────────
+    let pinchDist0 = null;
+    let pinchScale0 = null;
+    let pinchMidX = 0, pinchMidY = 0;
+
+    plano.addEventListener("touchstart", function(e) {
+      if (e.touches.length === 2) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        pinchDist0  = Math.hypot(dx, dy);
+        pinchScale0 = scale;
+        const rect = plano.getBoundingClientRect();
+        pinchMidX = ((e.touches[0].clientX + e.touches[1].clientX) / 2) - rect.left;
+        pinchMidY = ((e.touches[0].clientY + e.touches[1].clientY) / 2) - rect.top;
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    plano.addEventListener("touchmove", function(e) {
+      if (e.touches.length === 2 && pinchDist0 !== null) {
+        const dx = e.touches[0].clientX - e.touches[1].clientX;
+        const dy = e.touches[0].clientY - e.touches[1].clientY;
+        const dist = Math.hypot(dx, dy);
+        const newScale = Math.min(Math.max(pinchScale0 * (dist / pinchDist0), 0.1), 12);
+        applyScale(newScale, pinchMidX, pinchMidY);
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    plano.addEventListener("touchend", function(e) {
+      if (e.touches.length < 2) {
+        pinchDist0 = null;
+        pinchScale0 = null;
+      }
+    });
     // ─────────────────────────────────────────────────────
 
   </script>
