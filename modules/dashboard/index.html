@@ -204,14 +204,6 @@
   </script>
 
   <!-- ── Registro Service Worker ── -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('../../sw.js')
-          .then(function(reg) { console.log('[PDM SW] Registrado:', reg.scope); })
-          .catch(function(err) { console.warn('[PDM SW] Error:', err); });
-      });
-    }
-  </script>
+  <script src="../../js/sw-register.js"></script>
 </body>
 </html>

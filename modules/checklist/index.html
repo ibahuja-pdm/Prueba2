@@ -756,15 +756,7 @@
   </script>
 
   <!-- ── Service Worker ── -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function() {
-        navigator.serviceWorker.register('../../sw.js')
-          .then(function(r){ console.log('[PDM SW]', r.scope); })
-          .catch(function(e){ console.warn('[PDM SW] Error:', e); });
-      });
-    }
-  </script>
+  <script src="../../js/sw-register.js"></script>
 
 </body>
 </html>
