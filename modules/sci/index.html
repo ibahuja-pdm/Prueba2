@@ -207,7 +207,7 @@
     /* ── MINIMAPA ── */
     #minimapa {
       position: fixed;
-      bottom: 16px;
+      bottom: calc(var(--nav-h, 56px) + var(--safe-bottom, 0px) + 16px);
       left: 16px;
       width: 350px;       /* 1541 * 0.1 * (286/154) ≈ exact aspect */
       height: 200px;       /* 20px header + 55px canvas (544*0.1=54.4) */
